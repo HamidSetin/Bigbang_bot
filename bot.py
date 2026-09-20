@@ -3,6 +3,12 @@ import telebot
 TOKEN = '8604260086:AAGvY_Y6MALYk8T72zN8cMF7tu2TRdcNCVU'
 bot = telebot.TeleBot(TOKEN)
 
+# پاک کردن وب‌هوک قبلی برای جلوگیری از خطای Conflict
+try:
+    bot.remove_webhook()
+except Exception as e:
+    print(f"Webhook remove error: {e}")
+
 # لیست آیدی‌های عددی ادمین‌ها (خودت و پشتیبان)
 ADMIN_IDS = [
     6202317657,      # آیدی عددی خودت
