@@ -3,23 +3,28 @@ import telebot
 TOKEN = '8604260086:AAGvY_Y6MALYk8T72zN8cMF7tu2TRdcNCVU'
 bot = telebot.TeleBot(TOKEN)
 
-# پاکسازی وب‌هوک‌های قبلی
+# پاکسازی کامل وب‌هوک‌های قبلی
 try:
     bot.remove_webhook()
 except Exception:
     pass
 
+# آیدی‌های عددی ادمین‌ها
 ADMIN_IDS = [
     6202317657,      
     8304730388       
 ]
 
 SUPPORT_USERNAME = "Sup_Bigbang"
+
+# لینک کانال‌های آرشیو رایگان
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
+# دیکشنری نگهداری محصول انتخابی کاربر
 user_selected_product = {}
 
+# منوی محصولات اصلی (دکمه‌های شیشه‌ای)
 def get_main_markup():
     markup = telebot.types.InlineKeyboardMarkup(row_width=1)
     markup.add(
@@ -31,6 +36,7 @@ def get_main_markup():
     )
     return markup
 
+# کیبورد ثابت پایین صفحه
 def get_persistent_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(telebot.types.KeyboardButton("🚀 منوی اصلی / شروع"))
@@ -58,9 +64,14 @@ def send_welcome(message):
         reply_markup=get_persistent_keyboard()
     )
 
+# هندلر جامع دکمه‌های شیشه‌ای محصولات
 @bot.callback_query_handler(func=lambda call: call.data in ["buy_zist", "shimi", "fizik", "math", "full_4"])
 def process_buy_callback(call):
-    bot.answer_callback_query(call.id)
+    print(f"DEBUG PRODUCT CLICK: {call.data}")
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception as e:
+        print(f"Answer callback error: {e}")
     
     prices = {
         "buy_zist": ("بانک تست زیست جامع", "499,000"),
@@ -88,11 +99,15 @@ def process_buy_callback(call):
             parse_mode="Markdown"
         )
     except Exception as e:
-        print(f"Edit error: {e}")
+        print(f"Edit message error: {e}")
 
+# هندلر تایید فیش توسط ادمین
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def approve_user_callback(call):
-    bot.answer_callback_query(call.id)
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception as e:
+        print(f"Approve callback error: {e}")
     
     if call.from_user.id not in ADMIN_IDS:
         bot.answer_callback_query(call.id, "❌ شما دسترسی ادمین ندارید!", show_alert=True)
@@ -122,6 +137,7 @@ def approve_user_callback(call):
     except Exception as e:
         print(f"Caption edit error: {e}")
 
+# هندلر دریافت عکس یا فایل فیش واریزی
 @bot.message_handler(content_types=['photo', 'document'])
 def handle_receipt(message):
     user_id = message.from_user.id
@@ -170,6 +186,7 @@ def handle_receipt(message):
         parse_mode="Markdown"
     )
 
+# هندلر دکمه‌های ثابت پایین صفحه
 @bot.message_handler(func=lambda message: message.text in [
     "🚀 منوی اصلی / شروع", 
     "💬 ارتباط با پشتیبانی", 
@@ -222,14 +239,15 @@ def handle_persistent_buttons(message):
             "⚗️ فیزیک:\n"
             "🔹 قلم‌چی | ماز | ماراتون | خیلی سبز | مدارس برتر\n\n"
             "📐 ریاضی:\n"
-            "🔹 قلم‌چی | ماراتون | خیلی سبز | ماZ | مدارس برتر | آلفا\n\n"
+            "🔹 قلم‌چی | ماراتون | خیلی سبز | ماز | مدارس برتر | آلفا\n\n"
             "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
-            "💯 پوشش صددرصدی تمام مباحث و فعالیت‌های کتاب درسی.\n"
-            "🧠 گلچین‌شده توسط رتبه‌برترها و طراحان کنکور.\n\n"
+            "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب درسی رو شخم زدیم؛ هیچ چیزی از قلم نیفتفته!\n\n"
+            "🧠 توسط رتبه‌برترها و طراحان: سوالات توسط رتبه‌های برتر کنکور و طراحان مطرح آزمون‌ها گلچین شدن تا کیفیت کار صددرصد تضمینی باشه.\n\n"
             "👇 همین الان از منوی بالا محصول مورد نظرت رو انتخاب کن:",
             reply_markup=user_markup
         )
 
+# هندلر متدهای متنی متفرقه
 @bot.message_handler(func=lambda message: True)
 def handle_text_fallback(message):
     user_markup = telebot.types.InlineKeyboardMarkup()
@@ -241,5 +259,4 @@ def handle_text_fallback(message):
         reply_markup=user_markup
     )
 
-# بدون هیچ آرگومان اضافی تا کرش نکند
 bot.infinity_polling()
