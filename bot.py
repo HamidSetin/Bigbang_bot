@@ -3,16 +3,17 @@ import telebot
 TOKEN = '8604260086:AAGvY_Y6MALYk8T72zN8cMF7tu2TRdcNCVU'
 bot = telebot.TeleBot(TOKEN)
 
-# پاک کردن وب‌هوک قبلی برای جلوگیری از خطای Conflict
+# پاک کردن وب‌هوک قبلی برای جلوگیری از تداخل و فریز شدن دکمه‌ها
 try:
     bot.remove_webhook()
+    print("Webhook removed successfully.")
 except Exception as e:
     print(f"Webhook remove error: {e}")
 
-# لیست آیدی‌های عددی ادمین‌ها (خودت و پشتیبان)
+# آیدی‌های عددی ادمین‌ها
 ADMIN_IDS = [
-    6202317657,      # آیدی عددی خودت
-    8304730388       # آی‌دی عددی واقعیِ پشتیبان
+    6202317657,      
+    8304730388       
 ]
 
 SUPPORT_USERNAME = "Sup_Bigbang"
@@ -21,10 +22,10 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
-# دیکشنری موقت برای نگهداری محصول انتخابی هر کاربر تا زمان ارسال فیش
+# دیکشنری نگهداری محصول انتخابی کاربر
 user_selected_product = {}
 
-# منوی محصولات اصلی با قیمت‌های جدید و پکیج تخفیف‌دار
+# منوی محصولات اصلی (دکمه‌های شیشه‌ای)
 def get_main_markup():
     markup = telebot.types.InlineKeyboardMarkup(row_width=1)
     markup.add(
@@ -36,7 +37,7 @@ def get_main_markup():
     )
     return markup
 
-# کیبورد ثابت (پایین صفحه چت برای کاربر)
+# کیبورد ثابت پایین صفحه
 def get_persistent_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_start = telebot.types.KeyboardButton("🚀 منوی اصلی / شروع")
@@ -67,10 +68,16 @@ def send_welcome(message):
         reply_markup=get_persistent_keyboard()
     )
 
-@bot.callback_query_handler(func=lambda call: call.data in ["buy_zist", "shimi", "fizik", "math", "full_4"])
-def process_buy(call):
-    # این خط حیاتیه تا دکمه از حالت چرخش و لودینگ دربیاد:
-    bot.answer_callback_query(call.id)
+# هندلر جامع و مطمئن برای کلیک روی دکمه‌های شیشه‌ای
+@bot.callback_query_handler(func=lambda call: True)
+def handle_all_callbacks(call):
+    print(f"DEBUG: Callback received -> {call.data}")
+    
+    # بستن حالت لودینگ دکمه در تلگرام
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception as e:
+        print(f"Answer callback error: {e}")
     
     prices = {
         "buy_zist": ("بانک تست زیست جامع", "499,000"),
@@ -80,17 +87,25 @@ def process_buy(call):
         "full_4": ("هر 4 بانک تست (پکیج کامل با تخفیف)", "1,500,000")
     }
     
-    item_name, price = prices[call.data]
-    user_selected_product[call.from_user.id] = item_name
-    
-    text = (
-        f"💳 خرید {item_name}\n\n"
-        f"💰 مبلغ قابل پرداخت: {price} تومان\n\n"
-        f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
-        "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
-    )
-    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id, 
-                          text=text, parse_mode="Markdown")
+    if call.data in prices:
+        item_name, price = prices[call.data]
+        user_selected_product[call.from_user.id] = item_name
+        
+        text = (
+            f"💳 خرید {item_name}\n\n"
+            f"💰 مبلغ قابل پرداخت: {price} تومان\n\n"
+            f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
+            "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
+        )
+        try:
+            bot.edit_message_text(
+                chat_id=call.message.chat.id, 
+                message_id=call.message.message_id, 
+                text=text, 
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            print(f"Edit message error: {e}")
 
 # هندلر دریافت فیش واریزی (عکس یا سند)
 @bot.message_handler(content_types=['photo', 'document'])
@@ -100,7 +115,6 @@ def handle_receipt(message):
     username = message.from_user.username
     
     chat_info = f"@{username}" if username else "بدون آیدی"
-    
     product_purchased = user_selected_product.get(user_id, "نامشخص / از منو انتخاب نشده")
     
     markup = telebot.types.InlineKeyboardMarkup()
@@ -210,20 +224,13 @@ def handle_persistent_buttons(message):
             reply_markup=user_markup
         )
 
-@bot.message_handler(func=lambda message: True)
-def handle_text(message):
-    user_markup = telebot.types.InlineKeyboardMarkup()
-    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
-    
-    bot.send_message(
-        message.chat.id,
-        "⚠️ لطفاً برای ارسال فیش واریزی، **فقط عکس یا اسکرین‌شات فیش** را ارسال کنید.",
-        reply_markup=user_markup
-    )
-
+# هندلر تایید فیش توسط ادمین
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def approve_user(call):
-    bot.answer_callback_query(call.id)
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception as e:
+        print(f"Approve callback error: {e}")
     
     if call.from_user.id not in ADMIN_IDS:
         bot.answer_callback_query(call.id, "❌ شما دسترسی ادمین ندارید!", show_alert=True)
@@ -234,17 +241,34 @@ def approve_user(call):
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
-    bot.send_message(
-        user_id, 
-        "✅ فیش واریزی شما تایید شد!\nبرای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
-        reply_markup=user_markup
-    )
+    try:
+        bot.send_message(
+            user_id, 
+            "✅ فیش واریزی شما تایید شد!\nبرای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"Send to user error: {e}")
     
-    bot.edit_message_caption(
-        chat_id=call.message.chat.id, 
-        message_id=call.message.message_id, 
-        caption=call.message.caption + "\n\n🟢 وضعیت: تایید شد توسط ادمین", 
-        parse_mode="Markdown"
+    try:
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            caption=call.message.caption + "\n\n🟢 وضعیت: تایید شد توسط ادمین", 
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        print(f"Edit caption error: {e}")
+
+@bot.message_handler(func=lambda message: True)
+def handle_text(message):
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    bot.send_message(
+        message.chat.id,
+        "⚠️ لطفاً برای ارسال فیش واریزی، **فقط عکس یا اسکرین‌شات فیش** را ارسال کنید.",
+        reply_markup=user_markup
     )
 
 bot.infinity_polling()
