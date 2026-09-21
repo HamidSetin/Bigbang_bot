@@ -12,7 +12,7 @@ except Exception as e:
 # لیست آیدی‌های عددی ادمین‌ها (خودت و پشتیبان)
 ADMIN_IDS = [
     6202317657,      # آیدی عددی خودت
-    8304730388       # آی‌دی عددی واقعیِ پشتیبان (بدون علامت #)
+    8304730388       # آی‌دی عددی واقعیِ پشتیبان
 ]
 
 SUPPORT_USERNAME = "Sup_Bigbang"
@@ -69,6 +69,9 @@ def send_welcome(message):
 
 @bot.callback_query_handler(func=lambda call: call.data in ["buy_zist", "shimi", "fizik", "math", "full_4"])
 def process_buy(call):
+    # پاسخ به کالبک برای جلوگیری از ماندن روی حالت لودینگ
+    bot.answer_callback_query(call.id)
+    
     prices = {
         "buy_zist": ("بانک تست زیست جامع", "499,000"),
         "shimi": ("بانک تست شیمی جامع", "449,000"),
@@ -186,7 +189,7 @@ def handle_persistent_buttons(message):
             message.chat.id,
             "🔥 پرواز به سمت درصد ۱۰۰ با بانک تست‌های خفنِ «بیگ‌بنگ»! 🔥\n\n"
             "رفیق، اگر دنبال اینی که تو کنکور بترکونی و دیگه توی درس‌های اختصاصی لنگ هیچ منبعی نباشی، درست اومدی! ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم تا هیچ نکته‌ای از دستت در نره. 🎯\n\n"
-            "📌 تو این پکیج چی داریم?\n\n"
+            "📌 تو این پکیج چی داریم؟\n\n"
             "🧬 زیست‌شناسی:\n"
             "🔹 ماز (سالیانه و پرمیوم) | زیستاز (سالیانه و پیشرفته) | خیلی سبز (سالیانه و پلاس) | آرمان\n\n"
             "🧪 شیمی:\n"
@@ -222,6 +225,8 @@ def handle_text(message):
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def approve_user(call):
+    bot.answer_callback_query(call.id)
+    
     if call.from_user.id not in ADMIN_IDS:
         bot.answer_callback_query(call.id, "❌ شما دسترسی ادمین ندارید!", show_alert=True)
         return
