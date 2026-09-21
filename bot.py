@@ -3,7 +3,7 @@ import telebot
 TOKEN = '8604260086:AAGvY_Y6MALYk8T72zN8cMF7tu2TRdcNCVU'
 bot = telebot.TeleBot(TOKEN)
 
-# پاکسازی کامل وب‌هوک‌های قبلی
+# پاکسازی وب‌هوک‌های قبلی
 try:
     bot.remove_webhook()
 except Exception:
@@ -58,7 +58,6 @@ def send_welcome(message):
         reply_markup=get_persistent_keyboard()
     )
 
-# هندزفری دقیق کالبک‌ها برای محصولات
 @bot.callback_query_handler(func=lambda call: call.data in ["buy_zist", "shimi", "fizik", "math", "full_4"])
 def process_buy_callback(call):
     bot.answer_callback_query(call.id)
@@ -91,7 +90,6 @@ def process_buy_callback(call):
     except Exception as e:
         print(f"Edit error: {e}")
 
-# تایید فیش توسط ادمین
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def approve_user_callback(call):
     bot.answer_callback_query(call.id)
@@ -224,11 +222,10 @@ def handle_persistent_buttons(message):
             "⚗️ فیزیک:\n"
             "🔹 قلم‌چی | ماز | ماراتون | خیلی سبز | مدارس برتر\n\n"
             "📐 ریاضی:\n"
-            "🔹 قلم‌چی | ماراتون | خیلی سبز | ماز | مدارس برتر | آلفا\n\n"
+            "🔹 قلم‌چی | ماراتون | خیلی سبز | ماZ | مدارس برتر | آلفا\n\n"
             "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
-            "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب درسی رو شخم زدیم؛ هیچ چیزی از قلم نیفتفته!\n\n"
-            "🧠 توسط رتبه‌برترها و طراحان: سوالات توسط رتبه‌های برتر کنکور و طراحان مطرح آزمون‌ها گلچین شدن تا کیفیت کار صددرصد تضمینی باشه.\n\n"
-            "📈 همگام با سختی کنکور: سوالات دقیقاً متناسب با سطح دشواری کنکور طراحی شدن.\n\n"
+            "💯 پوشش صددرصدی تمام مباحث و فعالیت‌های کتاب درسی.\n"
+            "🧠 گلچین‌شده توسط رتبه‌برترها و طراحان کنکور.\n\n"
             "👇 همین الان از منوی بالا محصول مورد نظرت رو انتخاب کن:",
             reply_markup=user_markup
         )
@@ -244,4 +241,5 @@ def handle_text_fallback(message):
         reply_markup=user_markup
     )
 
-bot.infinity_polling(skip_pending=True)
+# بدون هیچ آرگومان اضافی تا کرش نکند
+bot.infinity_polling()
