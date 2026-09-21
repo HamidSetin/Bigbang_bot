@@ -69,7 +69,7 @@ def send_welcome(message):
 
 @bot.callback_query_handler(func=lambda call: call.data in ["buy_zist", "shimi", "fizik", "math", "full_4"])
 def process_buy(call):
-    # پاسخ به کالبک برای جلوگیری از ماندن روی حالت لودینگ
+    # این خط حیاتیه تا دکمه از حالت چرخش و لودینگ دربیاد:
     bot.answer_callback_query(call.id)
     
     prices = {
@@ -81,8 +81,6 @@ def process_buy(call):
     }
     
     item_name, price = prices[call.data]
-    
-    # ذخیره محصول انتخابی کاربر
     user_selected_product[call.from_user.id] = item_name
     
     text = (
