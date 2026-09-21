@@ -1,6 +1,6 @@
 import telebot
 
-TOKEN = '8604260086:AAGvY_Y6MALYk8T72zN8cMF7tu2TRdcNCVU'
+TOKEN = '8604260086:AAF6oNLy_rswQw_GtsJGub0ImAoaz70ypJw'
 bot = telebot.TeleBot(TOKEN)
 
 # پاکسازی کامل وب‌هوک‌های قبلی
