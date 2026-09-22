@@ -21,18 +21,26 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
-# دیکشنری نگهداری محصول انتخابی کاربر
+# دیکشنری نگهداری محصول انتخابی کاربر با قیمت‌های جدید تخفیف‌خورده (تا جمعه ۳ مهر)
+prices = {
+    "buy_zist": ("بانک تست زیست جامع", "400,000"),
+    "shimi": ("بانک تست شیمی جامع", "360,000"),
+    "fizik": ("بانک تست فیزیک جامع", "330,000"),
+    "math": ("بانک تست ریاضی جامع", "360,000"),
+    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,200,000")
+}
+
 user_selected_product = {}
 
-# منوی محصولات اصلی (دکمه‌های شیشه‌ای)
+# منوی محصولات اصلی با قیمت‌های جدید تخفیف‌خورده تا جمعه ۳ مهر
 def get_main_markup():
     markup = telebot.types.InlineKeyboardMarkup(row_width=1)
     markup.add(
-        telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 499,000 تومان", callback_data="buy_zist"),
-        telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 449,000 تومان", callback_data="shimi"),
-        telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 419,000 تومان", callback_data="fizik"),
-        telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 449,000 تومان", callback_data="math"),
-        telebot.types.InlineKeyboardButton("📦 هر 4 بانک تست (پکیج کامل با تخفیف) - 1,500,000 تومان", callback_data="full_4")
+        telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 400,000 تومان (تخفیف تا ۳ مهر)", callback_data="buy_zist"),
+        telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان (تخفیف تا ۳ مهر)", callback_data="shimi"),
+        telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان (تخفیف تا ۳ مهر)", callback_data="fizik"),
+        telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان (تخفیف تا ۳ مهر)", callback_data="math"),
+        telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,200,000 تومان (ویژه)", callback_data="full_4")
     )
     return markup
 
@@ -54,7 +62,7 @@ def get_persistent_keyboard():
 def send_welcome(message):
     bot.send_message(
         message.chat.id, 
-        "سلام! به ربات بیگ بنگ خوش آمدید.\n\nمحصول مورد نظرت رو از منوی زیر انتخاب کن:", 
+        "سلام! به ربات بیگ بنگ خوش آمدید.\n\n🔥 **جشنواره تخفیف ویژه تا جمعه ۳ مهر**\nمحصول مورد نظرت رو از منوی زیر انتخاب کن:", 
         reply_markup=get_main_markup(), 
         parse_mode="Markdown"
     )
@@ -65,7 +73,7 @@ def send_welcome(message):
     )
 
 # هندلر جامع دکمه‌های شیشه‌ای محصولات
-@bot.callback_query_handler(func=lambda call: call.data in ["buy_zist", "shimi", "fizik", "math", "full_4"])
+@bot.callback_query_handler(func=lambda call: call.data in prices.keys())
 def process_buy_callback(call):
     print(f"DEBUG PRODUCT CLICK: {call.data}")
     try:
@@ -73,20 +81,12 @@ def process_buy_callback(call):
     except Exception as e:
         print(f"Answer callback error: {e}")
     
-    prices = {
-        "buy_zist": ("بانک تست زیست جامع", "499,000"),
-        "shimi": ("بانک تست شیمی جامع", "449,000"),
-        "fizik": ("بانک تست فیزیک جامع", "419,000"),
-        "math": ("بانک تست ریاضی جامع", "449,000"),
-        "full_4": ("هر 4 بانک تست (پکیج کامل با تخفیف)", "1,500,000")
-    }
-    
     item_name, price = prices[call.data]
     user_selected_product[call.from_user.id] = item_name
     
     text = (
         f"💳 خرید {item_name}\n\n"
-        f"💰 مبلغ قابل پرداخت: {price} تومان\n\n"
+        f"💰 مبلغ قابل پرداخت: {price} تومان (تخفیف ویژه تا ۳ مهر)\n\n"
         f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
         "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
     )
