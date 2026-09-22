@@ -27,7 +27,7 @@ prices = {
     "shimi": ("بانک تست شیمی جامع", "360,000"),
     "fizik": ("بانک تست فیزیک جامع", "330,000"),
     "math": ("بانک تست ریاضی جامع", "360,000"),
-    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,200,000")
+    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,250,000")
 }
 
 user_selected_product = {}
@@ -40,7 +40,7 @@ def get_main_markup():
         telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان (تخفیف تا ۳ مهر)", callback_data="shimi"),
         telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان (تخفیف تا ۳ مهر)", callback_data="fizik"),
         telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان (تخفیف تا ۳ مهر)", callback_data="math"),
-        telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,200,000 تومان (ویژه)", callback_data="full_4")
+        telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,250,000 تومان (ویژه)", callback_data="full_4")
     )
     return markup
 
