@@ -1,12 +1,15 @@
-import os
 import telebot
-from flask import Flask, request
+import time
 
 TOKEN = '8604260086:AAF6oNLy_rswQw_GtsJGub0ImAoaz70ypJw'
 bot = telebot.TeleBot(TOKEN)
-app = Flask(__name__)
 
-# آیدی‌های عددی ادمین‌ها
+# پاکسازی کامل وب‌هوک‌های قبلی
+try:
+    bot.remove_webhook(drop_pending_updates=True)
+except Exception:
+    pass
+
 ADMIN_IDS = [
     6202317657,      
     8304730388       
@@ -14,11 +17,9 @@ ADMIN_IDS = [
 
 SUPPORT_USERNAME = "Sup_Bigbang"
 
-# لینک کانال‌های آرشیو رایگان
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
-# دیکشنری نگهداری محصول انتخابی کاربر با قیمت‌های تخفیف‌خورده تا ۳ مهر
 prices = {
     "buy_zist": ("بانک تست زیست جامع", "400,000"),
     "shimi": ("بانک تست شیمی جامع", "360,000"),
@@ -29,7 +30,6 @@ prices = {
 
 user_selected_product = {}
 
-# منوی محصولات اصلی با قیمت‌های تخفیف‌خورده تا ۳ مهر
 def get_main_markup():
     markup = telebot.types.InlineKeyboardMarkup(row_width=1)
     markup.add(
@@ -41,7 +41,6 @@ def get_main_markup():
     )
     return markup
 
-# کیبورد ثابت پایین صفحه
 def get_persistent_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
     keyboard.add(telebot.types.KeyboardButton("🚀 منوی اصلی / شروع"))
@@ -69,14 +68,12 @@ def send_welcome(message):
         reply_markup=get_persistent_keyboard()
     )
 
-# هندلر سراسری کلیک دکمه‌های شیشه‌ای
 @bot.callback_query_handler(func=lambda call: True)
 def handle_all_callbacks(call):
-    print(f"--> [WEBHOOK CLICK]: {call.data} from {call.from_user.id}")
     try:
         bot.answer_callback_query(call.id)
-    except Exception as e:
-        print(f"Answer error: {e}")
+    except Exception:
+        pass
     
     if call.data.startswith("approve_"):
         if call.from_user.id not in ADMIN_IDS:
@@ -249,29 +246,9 @@ def handle_text_fallback(message):
         reply_markup=user_markup
     )
 
-# تنظیمات مسیر وب‌هاک روی Flask
-@app.route(f'/{TOKEN}', methods=['POST'])
-def webhook():
-    if request.headers.get('content-type') == 'application/json':
-        json_string = request.get_data().decode('utf-8')
-        update = telebot.types.Update.de_json(json_string)
-        bot.process_new_updates([update])
-        return "OK", 200
-    else:
-        return "Invalid Request", 403
-
-@app.route('/')
-def index():
-    return "Bot is running via Webhook!", 200
-
-if __name__ == "__main__":
-    # تنظیم وب‌هاک روی آدرس عمومی ریلیوی (Railway خودکار دامنه را روی متغیر PORT تنظیم می‌کند)
-    railway_domain = os.environ.get('RAILWAY_STATIC_URL') or os.environ.get('RAILWAY_PUBLIC_DOMAIN')
-    if railway_domain:
-        webhook_url = f"https://{railway_domain}/{TOKEN}"
-        bot.remove_webhook()
-        bot.set_webhook(url=webhook_url)
-        print(f"Webhook set to: {webhook_url}")
-    
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+while True:
+    try:
+        bot.infinity_polling(timeout=60, long_polling_timeout=30)
+    except Exception as e:
+        print(f"Error: {e}")
+        time.sleep(3)
