@@ -4,7 +4,7 @@ import time
 TOKEN = '8604260086:AAF6oNLy_rswQw_GtsJGub0ImAoaz70ypJw'
 bot = telebot.TeleBot(TOKEN)
 
-# پاکسازی کامل وب‌هوک‌های قبلی
+# پاکسازی کامل آپدیت‌های معلق
 try:
     bot.remove_webhook(drop_pending_updates=True)
 except Exception:
@@ -31,14 +31,12 @@ prices = {
 user_selected_product = {}
 
 def get_main_markup():
-    markup = telebot.types.InlineKeyboardMarkup(row_width=1)
-    markup.add(
-        telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 400,000 تومان (تخفیف تا ۳ مهر)", callback_data="buy_zist"),
-        telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان (تخفیف تا ۳ مهر)", callback_data="shimi"),
-        telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان (تخفیف تا ۳ مهر)", callback_data="fizik"),
-        telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان (تخفیف تا ۳ مهر)", callback_data="math"),
-        telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,250,000 تومان (ویژه)", callback_data="full_4")
-    )
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.row(telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 400,000 تومان", callback_data="buy_zist"))
+    markup.row(telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان", callback_data="shimi"))
+    markup.row(telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان", callback_data="fizik"))
+    markup.row(telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان", callback_data="math"))
+    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,250,000 تومان", callback_data="full_4"))
     return markup
 
 def get_persistent_keyboard():
@@ -68,64 +66,72 @@ def send_welcome(message):
         reply_markup=get_persistent_keyboard()
     )
 
-@bot.callback_query_handler(func=lambda call: True)
-def handle_all_callbacks(call):
+# هندلر اختصاصی برای دکمه‌های خرید با دیکشنری مشخص
+@bot.callback_query_handler(func=lambda call: call.data in prices)
+def handle_buy_callback(call):
+    print(f"DEBUG: Buy button clicked -> {call.data}")
     try:
         bot.answer_callback_query(call.id)
     except Exception:
         pass
     
-    if call.data.startswith("approve_"):
-        if call.from_user.id not in ADMIN_IDS:
-            try:
-                bot.answer_callback_query(call.id, "❌ شما دسترسی ادمین ندارید!", show_alert=True)
-            except:
-                pass
-            return
-            
-        user_id = int(call.data.split("_")[1])
-        user_markup = telebot.types.InlineKeyboardMarkup()
-        user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
-        
-        try:
-            bot.send_message(
-                user_id, 
-                "✅ فیش واریزی شما تایید شد!\nبرای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
-                reply_markup=user_markup
-            )
-        except Exception as e:
-            print(f"User send error: {e}")
-        
-        try:
-            bot.edit_message_caption(
-                chat_id=call.message.chat.id, 
-                message_id=call.message.message_id, 
-                caption=call.message.caption + "\n\n🟢 وضعیت: تایید شد توسط ادمین", 
-                parse_mode="Markdown"
-            )
-        except Exception as e:
-            print(f"Caption edit error: {e}")
-        return
-
-    if call.data in prices:
-        item_name, price = prices[call.data]
-        user_selected_product[call.from_user.id] = item_name
-        
-        text = (
-            f"💳 خرید {item_name}\n\n"
-            f"💰 مبلغ قابل پرداخت: {price} تومان (تخفیف ویژه تا ۳ مهر)\n\n"
-            f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
-            "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
+    item_name, price = prices[call.data]
+    user_selected_product[call.from_user.id] = item_name
+    
+    text = (
+        f"💳 خرید {item_name}\n\n"
+        f"💰 مبلغ قابل پرداخت: {price} تومان (تخفیف ویژه تا ۳ مهر)\n\n"
+        f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
+        "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
+    )
+    try:
+        bot.edit_message_text(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            text=text, 
+            parse_mode="Markdown"
         )
+    except Exception as e:
+        print(f"Edit text error: {e}")
+
+# هندلر اختصاصی برای تأیید فیش توسط ادمین
+@bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
+def handle_approve_callback(call):
+    print(f"DEBUG: Approve button clicked -> {call.data}")
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+        
+    if call.from_user.id not in ADMIN_IDS:
         try:
-            bot.edit_message_text(
-                chat_id=call.message.chat.id, 
-                message_id=call.message.message_id, 
-                text=text, 
-                parse_mode="Markdown"
-            )
-        except Exception as e:
-            print(f"Edit error: {e}")
+            bot.answer_callback_query(call.id, "❌ شما دسترسی ادمین ندارید!", show_alert=True)
+        except:
+            pass
+        return
+        
+    user_id = int(call.data.split("_")[1])
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            user_id, 
+            "✅ فیش واریزی شما تایید شد!\nبرای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"User send error: {e}")
+    
+    try:
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            caption=call.message.caption + "\n\n🟢 وضعیت: تایید شد توسط ادمین", 
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        print(f"Caption edit error: {e}")
 
 @bot.message_handler(content_types=['photo', 'document'])
 def handle_receipt(message):
