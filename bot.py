@@ -1,7 +1,7 @@
 import telebot
 import time
 
-TOKEN = '8604260086:AAF6oNLy_rswQw_GtsJGub0ImAoaz70ypJw'
+TOKEN = '8604260086:AAGMYdYkNvY-sIz7dZlqjJS0Nw15AoNd__4'
 bot = telebot.TeleBot(TOKEN)
 
 # پاکسازی کامل آپدیت‌های معلق
