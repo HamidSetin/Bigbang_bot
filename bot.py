@@ -1,10 +1,11 @@
 import telebot
 import time
 
+# توکن جدید شما
 TOKEN = '8604260086:AAGMYdYkNvY-sIz7dZlqjJS0Nw15AoNd__4'
 bot = telebot.TeleBot(TOKEN)
 
-# پاکسازی کامل آپدیت‌های معلق
+# پاکسازی کامل آپدیت‌های معلق برای جلوگیری صددرصدی از ارور Conflict 409
 try:
     bot.remove_webhook(drop_pending_updates=True)
 except Exception:
@@ -20,23 +21,24 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
+# قیمت‌های جدید و نهایی
 prices = {
-    "buy_zist": ("بانک تست زیست جامع", "400,000"),
-    "shimi": ("بانک تست شیمی جامع", "360,000"),
-    "fizik": ("بانک تست فیزیک جامع", "330,000"),
-    "math": ("بانک تست ریاضی جامع", "360,000"),
-    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,250,000")
+    "buy_zist": ("بانک تست زیست جامع", "499,000"),
+    "shimi": ("بانک تست شیمی جامع", "449,000"),
+    "fizik": ("بانک تست فیزیک جامع", "419,000"),
+    "math": ("بانک تست ریاضی جامع", "449,000"),
+    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,500,000")
 }
 
 user_selected_product = {}
 
 def get_main_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 400,000 تومان", callback_data="buy_zist"))
-    markup.row(telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان", callback_data="shimi"))
-    markup.row(telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان", callback_data="fizik"))
-    markup.row(telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان", callback_data="math"))
-    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,250,000 تومان", callback_data="full_4"))
+    markup.row(telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 499,000 تومان", callback_data="buy_zist"))
+    markup.row(telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 449,000 تومان", callback_data="shimi"))
+    markup.row(telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 419,000 تومان", callback_data="fizik"))
+    markup.row(telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 449,000 تومان", callback_data="math"))
+    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,500,000 تومان", callback_data="full_4"))
     return markup
 
 def get_persistent_keyboard():
@@ -54,22 +56,23 @@ def get_persistent_keyboard():
 
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
-    bot.send_message(
-        message.chat.id, 
-        "سلام! به ربات بیگ بنگ خوش آمدید.\n\n🔥 **جشنواره تخفیف ویژه تا جمعه ۳ مهر**\nمحصول مورد نظرت رو از منوی زیر انتخاب کن:", 
-        reply_markup=get_main_markup(), 
-        parse_mode="Markdown"
-    )
-    bot.send_message(
-        message.chat.id,
-        "👇 دسترسی سریع به منوها و آرشیوهای رایگان از طریق دکمه‌های پایین صفحه:",
-        reply_markup=get_persistent_keyboard()
-    )
+    try:
+        bot.send_message(
+            message.chat.id, 
+            "سلام! به ربات بیگ بنگ خوش آمدید.\n\nمحصول مورد نظرت رو از منوی زیر انتخاب کن:", 
+            reply_markup=get_main_markup(), 
+            parse_mode="Markdown"
+        )
+        bot.send_message(
+            message.chat.id,
+            "👇 دسترسی سریع به منوها و آرشیوهای رایگان از طریق دکمه‌های پایین صفحه:",
+            reply_markup=get_persistent_keyboard()
+        )
+    except Exception as e:
+        print(f"Start command error: {e}")
 
-# هندلر اختصاصی برای دکمه‌های خرید با دیکشنری مشخص
 @bot.callback_query_handler(func=lambda call: call.data in prices)
 def handle_buy_callback(call):
-    print(f"DEBUG: Buy button clicked -> {call.data}")
     try:
         bot.answer_callback_query(call.id)
     except Exception:
@@ -80,7 +83,7 @@ def handle_buy_callback(call):
     
     text = (
         f"💳 خرید {item_name}\n\n"
-        f"💰 مبلغ قابل پرداخت: {price} تومان (تخفیف ویژه تا ۳ مهر)\n\n"
+        f"💰 مبلغ قابل پرداخت: {price} تومان\n\n"
         f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
         "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
     )
@@ -94,10 +97,8 @@ def handle_buy_callback(call):
     except Exception as e:
         print(f"Edit text error: {e}")
 
-# هندلر اختصاصی برای تأیید فیش توسط ادمین
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def handle_approve_callback(call):
-    print(f"DEBUG: Approve button clicked -> {call.data}")
     try:
         bot.answer_callback_query(call.id)
     except Exception:
@@ -174,12 +175,15 @@ def handle_receipt(message):
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
-    bot.send_message(
-        message.chat.id, 
-        f"✅ فیش شما برای خرید **{product_purchased}** دریافت شد.\nپس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
-        reply_markup=user_markup,
-        parse_mode="Markdown"
-    )
+    try:
+        bot.send_message(
+            message.chat.id, 
+            f"✅ فیش شما برای خرید **{product_purchased}** دریافت شد.\nپس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
+            reply_markup=user_markup,
+            parse_mode="Markdown"
+        )
+    except Exception as e:
+        print(f"User receipt ack error: {e}")
 
 @bot.message_handler(func=lambda message: message.text in [
     "🚀 منوی اصلی / شروع", 
@@ -192,69 +196,76 @@ def handle_persistent_buttons(message):
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("💬 چت با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
-    if message.text == "🚀 منوی اصلی / شروع":
-        bot.send_message(
-            message.chat.id,
-            "سلام دوباره! به منوی اصلی برگشتیم. محصول مورد نظرت رو انتخاب کن:",
-            reply_markup=get_main_markup()
-        )
-    elif message.text == "🎁 زیست پارسال (رایگان)":
-        free_zist_markup = telebot.types.InlineKeyboardMarkup()
-        free_zist_markup.add(telebot.types.InlineKeyboardButton("🔗 ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
-        bot.send_message(
-            message.chat.id,
-            "🎁 این هم هدیه شما؛ برای دریافت بانک تست زیست پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
-            reply_markup=free_zist_markup
-        )
-    elif message.text == "🎁 شیمی پارسال (رایگان)":
-        free_shimi_markup = telebot.types.InlineKeyboardMarkup()
-        free_shimi_markup.add(telebot.types.InlineKeyboardButton("🔗 ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
-        bot.send_message(
-            message.chat.id,
-            "🎁 این هم هدیه شما؛ برای دریافت بانک تست شیمی پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
-            reply_markup=free_shimi_markup
-        )
-    elif message.text == "💬 ارتباط با پشتیبانی":
-        bot.send_message(
-            message.chat.id,
-            "برای ارتباط مستقیم با پشتیبانی و پرسیدن سوالات خود، روی دکمه زیر بزنید:",
-            reply_markup=user_markup
-        )
-    elif message.text == "توضیحات بانک تست‌ها 📚":
-        bot.send_message(
-            message.chat.id,
-            "🔥 پرواز به سمت درصد ۱۰۰ با بانک تست‌های خفنِ «بیگ‌بنگ»! 🔥\n\n"
-            "رفیق، اگر دنبال اینی که تو کنکور بترکونی و دیگه توی درس‌های اختصاصی لنگ هیچ منبعی نباشی، درست اومدی! ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم تا هیچ نکته‌ای از دستت در نره. 🎯\n\n"
-            "📌 تو این پکیج چی داریم؟\n\n"
-            "🧬 زیست‌شناسی:\n"
-            "🔹 ماز (سالیانه و پرمیوم) | زیستاز (سالیانه و پیشرفته) | خیلی سبز (سالیانه و پلاس) | آرمان\n\n"
-            "🧪 شیمی:\n"
-            "🔹 قلم‌چی | ماز | ماراتون | خیلی سبز\n\n"
-            "⚗️ فیزیک:\n"
-            "🔹 قلم‌چی | ماز | ماراتون | خیلی سبز | مدارس برتر\n\n"
-            "📐 ریاضی:\n"
-            "🔹 قلم‌چی | ماراتون | خیلی سبز | ماز | مدارس برتر | آلفا\n\n"
-            "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
-            "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب درسی رو شخم زدیم؛ هیچ چیزی از قلم نیفتفته!\n\n"
-            "🧠 توسط رتبه‌برترها و طراحان: سوالات توسط رتبه‌های برتر کنکور و طراحان مطرح آزمون‌ها گلچین شدن تا کیفیت کار صددرصد تضمینی باشه.\n\n"
-            "👇 همین الان از منوی بالا محصول مورد نظرت رو انتخاب کن:",
-            reply_markup=user_markup
-        )
+    try:
+        if message.text == "🚀 منوی اصلی / شروع":
+            bot.send_message(
+                message.chat.id,
+                "سلام دوباره! به منوی اصلی برگشتیم. محصول مورد نظرت رو انتخاب کن:",
+                reply_markup=get_main_markup()
+            )
+        elif message.text == "🎁 زیست پارسال (رایگان)":
+            free_zist_markup = telebot.types.InlineKeyboardMarkup()
+            free_zist_markup.add(telebot.types.InlineKeyboardButton("🔗 ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
+            bot.send_message(
+                message.chat.id,
+                "🎁 این هم هدیه شما؛ برای دریافت بانک تست زیست پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
+                reply_markup=free_zist_markup
+            )
+        elif message.text == "🎁 شیمی پارسال (رایگان)":
+            free_shimi_markup = telebot.types.InlineKeyboardMarkup()
+            free_shimi_markup.add(telebot.types.InlineKeyboardButton("🔗 ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
+            bot.send_message(
+                message.chat.id,
+                "🎁 این هم هدیه شما؛ برای دریافت بانک تست شیمی پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
+                reply_markup=free_shimi_markup
+            )
+        elif message.text == "💬 ارتباط با پشتیبانی":
+            bot.send_message(
+                message.chat.id,
+                "برای ارتباط مستقیم با پشتیبانی و پرسیدن سوالات خود، روی دکمه زیر بزنید:",
+                reply_markup=user_markup
+            )
+        elif message.text == "توضیحات بانک تست‌ها 📚":
+            bot.send_message(
+                message.chat.id,
+                "🔥 پرواز به سمت درصد ۱۰۰ با بانک تست‌های خفنِ «بیگ‌بنگ»! 🔥\n\n"
+                "رفیق، اگر دنبال اینی که تو کنکور بترکونی و دیگه توی درس‌های اختصاصی لنگ هیچ منبعی نباشی، درست اومدی! ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم تا هیچ نکته‌ای از دستت در نره. 🎯\n\n"
+                "📌 تو این پکیج چی داریم؟\n\n"
+                "🧬 زیست‌شناسی:\n"
+                "🔹 ماز (سالیانه و پرمیوم) | زیستاز (سالیانه و پیشرفته) | خیلی سبز (سالیانه و پلاس) | آرمان\n\n"
+                "🧪 شیمی:\n"
+                "🔹 قلم‌چی | ماز | ماراتون | خیلی سبز\n\n"
+                "⚗️ فیزیک:\n"
+                "🔹 قلم‌چی | ماز | ماراتون | خیلی سبز | مدارس برتر\n\n"
+                "📐 ریاضی:\n"
+                "🔹 قلم‌چی | ماراتون | خیلی سبز | ماز | مدارس برتر | آلفا\n\n"
+                "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
+                "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب درسی رو شخم زدیم؛ هیچ چیزی از قلم نیفتفته!\n\n"
+                "🧠 توسط رتبه‌برترها و طراحان: سوالات توسط رتبه‌های برتر کنکور و طراحان مطرح آزمون‌ها گلچین شدن تا کیفیت کار صددرصد تضمینی باشه.\n\n"
+                "👇 همین الان از منوی بالا محصول مورد نظرت رو انتخاب کن:",
+                reply_markup=user_markup
+            )
+    except Exception as e:
+        print(f"Persistent button error: {e}")
 
 @bot.message_handler(func=lambda message: True)
 def handle_text_fallback(message):
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
-    bot.send_message(
-        message.chat.id,
-        "⚠️ لطفاً برای ارسال فیش واریزی، **فقط عکس یا اسکرین‌شات فیش** را ارسال کنید.",
-        reply_markup=user_markup
-    )
+    try:
+        bot.send_message(
+            message.chat.id,
+            "⚠️ لطفاً برای ارسال فیش واریزی، **فقط عکس یا اسکرین‌شات فیش** را ارسال کنید.",
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"Fallback error: {e}")
 
+# حلقه امن پولینگ برای جلوگیری از کرش‌های ناخواسته
 while True:
     try:
         bot.infinity_polling(timeout=60, long_polling_timeout=30)
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"Polling Error: {e}")
         time.sleep(3)
