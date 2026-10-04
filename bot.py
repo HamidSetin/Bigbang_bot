@@ -21,24 +21,24 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
-# قیمت‌های جدید و نهایی
+# قیمت‌های زیر فقط تا روز جمعه 17 مهر برقرار خواهد بود
 prices = {
-    "buy_zist": ("بانک تست زیست جامع", "499,000"),
-    "shimi": ("بانک تست شیمی جامع", "449,000"),
-    "fizik": ("بانک تست فیزیک جامع", "419,000"),
-    "math": ("بانک تست ریاضی جامع", "449,000"),
-    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,500,000")
+    "buy_zist": ("بانک تست زیست جامع", "400,000"),
+    "shimi": ("بانک تست شیمی جامع", "360,000"),
+    "fizik": ("بانک تست فیزیک جامع", "330,000"),
+    "math": ("بانک تست ریاضی جامع", "360,000"),
+    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,250,000")
 }
 
 user_selected_product = {}
 
 def get_main_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 499,000 تومان", callback_data="buy_zist"))
-    markup.row(telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 449,000 تومان", callback_data="shimi"))
-    markup.row(telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 419,000 تومان", callback_data="fizik"))
-    markup.row(telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 449,000 تومان", callback_data="math"))
-    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,500,000 تومان", callback_data="full_4"))
+    markup.row(telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 400,000 تومان", callback_data="buy_zist"))
+    markup.row(telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان", callback_data="shimi"))
+    markup.row(telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان", callback_data="fizik"))
+    markup.row(telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان", callback_data="math"))
+    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,250,000 تومان", callback_data="full_4"))
     return markup
 
 def get_persistent_keyboard():
