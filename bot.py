@@ -35,36 +35,36 @@ user_phones = {}
 
 def get_main_menu_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("خرید نقدی (آنی با تخفیف ویژه)", callback_data="mode_cash"))
-    markup.row(telebot.types.InlineKeyboardButton("خرید اقساطی (ویژه پکیج کامل)", callback_data="mode_installment"))
+    markup.row(telebot.types.InlineKeyboardButton("💳 خرید نقدی (آنی با تخفیف ویژه)", callback_data="mode_cash"))
+    markup.row(telebot.types.InlineKeyboardButton("🤝 خرید اقساطی (ویژه پکیج کامل)", callback_data="mode_installment"))
     return markup
 
 def get_cash_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("زیست جامع - 400,000 تومان", callback_data="cash_zist"))
-    markup.row(telebot.types.InlineKeyboardButton("شیمی جامع - 360,000 تومان", callback_data="cash_shimi"))
-    markup.row(telebot.types.InlineKeyboardButton("فیزیک جامع - 330,000 تومان", callback_data="cash_fizik"))
-    markup.row(telebot.types.InlineKeyboardButton("ریاضی جامع - 360,000 تومان", callback_data="cash_math"))
-    markup.row(telebot.types.InlineKeyboardButton("پکیج کامل ۴ درس - 1,250,000 تومان", callback_data="cash_full"))
-    markup.row(telebot.types.InlineKeyboardButton("بازگشت به منوی اصلی", callback_data="back_to_main"))
+    markup.row(telebot.types.InlineKeyboardButton("🧬 زیست جامع - 400,000 تومان", callback_data="cash_zist"))
+    markup.row(telebot.types.InlineKeyboardButton("🧪 شیمی جامع - 360,000 تومان", callback_data="cash_shimi"))
+    markup.row(telebot.types.InlineKeyboardButton("⚗️ فیزیک جامع - 330,000 تومان", callback_data="cash_fizik"))
+    markup.row(telebot.types.InlineKeyboardButton("📐 ریاضی جامع - 360,000 تومان", callback_data="cash_math"))
+    markup.row(telebot.types.InlineKeyboardButton("🔥 پکیج کامل ۴ درس - 1,250,000 تومان", callback_data="cash_full"))
+    markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
     return markup
 
 def get_installment_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("پکیج کامل اقساطی (قسط اول ۶۰۰ تومانی)", callback_data="inst_full"))
-    markup.row(telebot.types.InlineKeyboardButton("بازگشت به منوی اصلی", callback_data="back_to_main"))
+    markup.row(telebot.types.InlineKeyboardButton("💎 پکیج کامل اقساطی (قسط اول ۶۰۰ تومانی)", callback_data="inst_full"))
+    markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
     return markup
 
 def get_persistent_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(telebot.types.KeyboardButton("منوی اصلی / شروع"))
+    keyboard.add(telebot.types.KeyboardButton("🏠 منوی اصلی / شروع"))
     keyboard.add(
-        telebot.types.KeyboardButton("زیست پارسال (رایگان)"),
-        telebot.types.KeyboardButton("شیمی پارسال (رایگان)")
+        telebot.types.KeyboardButton("🎁 زیست پارسال (رایگان)"),
+        telebot.types.KeyboardButton("🎁 شیمی پارسال (رایگان)")
     )
     keyboard.add(
-        telebot.types.KeyboardButton("ارتباط با پشتیبانی"),
-        telebot.types.KeyboardButton("توضیحات بانک تست‌ها")
+        telebot.types.KeyboardButton("📞 ارتباط با پشتیبانی"),
+        telebot.types.KeyboardButton("📖 توضیحات بانک تست‌ها")
     )
     return keyboard
 
@@ -96,7 +96,7 @@ def handle_mode_selection(call):
             bot.edit_message_text(
                 chat_id=call.message.chat.id,
                 message_id=call.message.message_id,
-                text="بخش خرید نقدی (آنی با تخفیف‌های ویژه تا جمعه ۱۷ مهر)\n\nمحصول مورد نظر خود را انتخاب کنید:",
+                text="💳 بخش خرید نقدی (آنی با تخفیف‌های ویژه تا جمعه ۱۷ مهر)\n\nمحصول مورد نظر خود را انتخاب کنید:",
                 reply_markup=get_cash_markup()
             )
         except Exception as e:
@@ -105,7 +105,7 @@ def handle_mode_selection(call):
     elif call.data == "mode_installment":
         if call.from_user.id not in user_phones:
             contact_markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-            contact_markup.add(telebot.types.KeyboardButton("اشتراک‌گذاری شماره تلفن برای خرید اقساطی", request_contact=True))
+            contact_markup.add(telebot.types.KeyboardButton("📱 اشتراک‌گذاری شماره تلفن برای خرید اقساطی", request_contact=True))
             
             try:
                 bot.send_message(
@@ -121,9 +121,9 @@ def handle_mode_selection(call):
                     chat_id=call.message.chat.id,
                     message_id=call.message.message_id,
                     text=(
-                        "بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
-                        "قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
-                        "شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان (دو ماه بعد، هر ماه یک قسط)\n\n"
+                        "🤝 بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
+                        "💰 قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
+                        "📋 شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان (دو ماه بعد، هر ماه یک قسط)\n\n"
                         "محصول خود را انتخاب کنید:"
                     ),
                     reply_markup=get_installment_markup()
@@ -149,15 +149,15 @@ def handle_contact(message):
         try:
             bot.send_message(
                 message.chat.id,
-                f"شماره تلفن شما ({message.contact.phone_number}) با موفقیت ثبت شد.",
+                f"✅ شماره تلفن شما ({message.contact.phone_number}) با موفقیت ثبت شد.",
                 reply_markup=get_persistent_keyboard()
             )
             bot.send_message(
                 message.chat.id,
                 (
-                    "بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
-                    "قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
-                    "شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان\n\n"
+                    "🤝 بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
+                    "💰 قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
+                    "📋 شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان\n\n"
                     "محصول خود را انتخاب کنید:"
                 ),
                 reply_markup=get_installment_markup()
@@ -178,21 +178,21 @@ def handle_buy_callback(call):
         item_name, price = cash_prices[call.data]
         user_selected_product[user_id] = f"{item_name} (نقدی)"
         text = (
-            f"خرید نقدی: {item_name}\n\n"
-            f"مبلغ قابل پرداخت: {price} تومان\n\n"
-            "شماره کارت: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
-            "لطفاً وجه را واریز کرده و عکس فیش را همینجا ارسال کنید."
+            f"🛒 خرید نقدی: {item_name}\n\n"
+            f"💵 مبلغ قابل پرداخت: {price} تومان\n\n"
+            "💳 شماره کارت: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
+            "📷 لطفاً وجه را واریز کرده و عکس فیش را همینجا ارسال کنید."
         )
     else:
         item_name, price_info = installment_prices[call.data]
         user_selected_product[user_id] = f"{item_name} (اقساطی)"
         phone = user_phones.get(user_id, "ثبت نشده")
         text = (
-            f"خرید اقساطی: {item_name}\n\n"
-            f"شرایط پرداخت: {price_info}\n"
-            f"شماره تماس شما: {phone}\n\n"
-            "شماره کارت برای واریز قسط اول: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
-            "لطفاً قسط اول را واریز کرده و عکس فیش آن را همینجا ارسال کنید."
+            f"🛒 خرید اقساطی: {item_name}\n\n"
+            f"📋 شرایط پرداخت: {price_info}\n"
+            f"📱 شماره تماس شما: {phone}\n\n"
+            "💳 شماره کارت برای واریز قسط اول: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
+            "📷 لطفاً قسط اول را واریز کرده و عکس فیش آن را همینجا ارسال کنید."
         )
         
     try:
@@ -220,12 +220,12 @@ def handle_approve_callback(call):
         
     user_id = int(call.data.split("_")[1])
     user_markup = telebot.types.InlineKeyboardMarkup()
-    user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
     try:
         bot.send_message(
             user_id, 
-            "فیش واریزی شما تایید شد! برای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
+            "✅ فیش واریزی شما تایید شد! برای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
             reply_markup=user_markup
         )
     except Exception as e:
@@ -235,7 +235,7 @@ def handle_approve_callback(call):
         bot.edit_message_caption(
             chat_id=call.message.chat.id, 
             message_id=call.message.message_id, 
-            caption=call.message.caption + "\n\nوضعیت: تایید شد توسط ادمین"
+            caption=call.message.caption + "\n\n🟢 وضعیت: تایید شد توسط ادمین"
         )
     except Exception as e:
         print(f"Caption edit error: {e}")
@@ -252,16 +252,16 @@ def handle_receipt(message):
     
     markup = telebot.types.InlineKeyboardMarkup()
     if username:
-        markup.add(telebot.types.InlineKeyboardButton("چت مستقیم با کاربر", url=f"https://t.me/{username}"))
-    markup.add(telebot.types.InlineKeyboardButton("تایید فیش", callback_data=f"approve_{user_id}"))
+        markup.add(telebot.types.InlineKeyboardButton("💬 چت مستقیم با کاربر", url=f"https://t.me/{username}"))
+    markup.add(telebot.types.InlineKeyboardButton("✅ تایید فیش", callback_data=f"approve_{user_id}"))
     
     caption = (
-        f"فیش واریزی جدید!\n\n"
-        f"محصول: {product_purchased}\n"
-        f"نام: {user_name}\n"
-        f"آیدی: {chat_info}\n"
-        f"شماره تماس: {phone}\n"
-        f"آی‌‌دی عددی: {user_id}\n\n"
+        f"🚨 فیش واریزی جدید!\n\n"
+        f"📦 محصول: {product_purchased}\n"
+        f"👤 نام: {user_name}\n"
+        f"🔗 آیدی: {chat_info}\n"
+        f"📱 شماره تماس: {phone}\n"
+        f"🆔 آیدی عددی: {user_id}\n\n"
         "برای تایید روی دکمه زیر بزنید."
     )
     
@@ -281,87 +281,51 @@ def handle_receipt(message):
                 print(f"Admin doc error: {e}")
     
     user_markup = telebot.types.InlineKeyboardMarkup()
-    user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
     try:
         bot.send_message(
             message.chat.id, 
-            f"فیش شما برای {product_purchased} دریافت شد. پس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
+            f"✅ فیش شما برای {product_purchased} دریافت شد. پس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
             reply_markup=user_markup
         )
     except Exception as e:
         print(f"User receipt ack error: {e}")
 
 @bot.message_handler(func=lambda message: message.text in [
-    "منوی اصلی / شروع", 
-    "ارتباط با پشتیبانی", 
-    "توضیحات بانک تست‌ها", 
-    "زیست پارسال (رایگان)", 
-    "شیمی پارسال (رایگان)"
+    "🏠 منوی اصلی / شروع", 
+    "📞 ارتباط با پشتیبانی", 
+    "📖 توضیحات بانک تست‌ها", 
+    "🎁 زیست پارسال (رایگان)", 
+    "🎁 شیمی پارسال (رایگان)"
 ])
 def handle_persistent_buttons(message):
-    user_markup = telebot.types.InlineKeyboardMarkup()
-    user_markup.add(telebot.types.InlineKeyboardButton("چت با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
-    
     try:
-        if message.text == "منوی اصلی / شروع":
+        if message.text == "🏠 منوی اصلی / شروع":
             bot.send_message(
                 message.chat.id,
                 "سلام دوباره! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
                 reply_markup=get_main_menu_markup()
             )
-        elif message.text == "زیست پارسال (رایگان)":
+        elif message.text == "🎁 زیست پارسال (رایگان)":
             free_zist_markup = telebot.types.InlineKeyboardMarkup()
-            free_zist_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
+            free_zist_markup.add(telebot.types.InlineKeyboardButton("🚀 ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
             bot.send_message(
                 message.chat.id,
                 "این هم هدیه شما؛ برای دریافت بانک تست زیست پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
                 reply_markup=free_zist_markup
             )
-        elif message.text == "شیمی پارسال (رایگان)":
+        elif message.text == "🎁 شیمی پارسال (رایگان)":
             free_shimi_markup = telebot.types.InlineKeyboardMarkup()
-            free_shimi_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
+            free_shimi_markup.add(telebot.types.InlineKeyboardButton("🚀 ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
             bot.send_message(
                 message.chat.id,
                 "این هم هدیه شما؛ برای دریافت بانک تست شیمی پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
                 reply_markup=free_shimi_markup
             )
-        elif message.text == "ارتباط با پشتیبانی":
+        elif message.text == "📞 ارتباط با پشتیبانی":
+            user_markup = telebot.types.InlineKeyboardMarkup()
+            user_markup.add(telebot.types.InlineKeyboardButton("💬 چت با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
             bot.send_message(
                 message.chat.id,
-                "برای ارتباط مستقیم با پشتیبانی و پرسیدن سوالات خود، روی دکمه زیر بزنید:",
-                reply_markup=user_markup
-            )
-        elif message.text == "توضیحات بانک تست‌ها":
-            bot.send_message(
-                message.chat.id,
-                "پرواز به سمت درصد ۱۰۰ با بانک تست‌های بیگ‌بنگ!\n\n"
-                "رفیق، ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم.\n\n"
-                "زیست، شیمی، فیزیک و ریاضی با پوشش کامل مباحث کنکور آماده‌ست تا بترکونی.\n\n"
-                "همین الان نوع خرید خود را انتخاب کن:",
-                reply_markup=user_markup
-            )
-    except Exception as e:
-        print(f"Persistent button error: {e}")
-
-@bot.message_handler(func=lambda message: True)
-def handle_text_fallback(message):
-    user_markup = telebot.types.InlineKeyboardMarkup()
-    user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
-    
-    try:
-        bot.send_message(
-            message.chat.id,
-            "لطفاً برای ارسال فیش واریزی، فقط عکس یا اسکرین‌شات فیش را ارسال کنید.",
-            reply_markup=user_markup
-        )
-    except Exception as e:
-        print(f"Fallback error: {e}")
-
-if __name__ == "__main__":
-    while True:
-        try:
-            bot.infinity_polling(timeout=60, long_polling_timeout=30)
-        except Exception as e:
-            print(f"Polling Error: {e}")
-            time.sleep(3)
+                "برای ارتباط مستقیم با پشتی
