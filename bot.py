@@ -35,36 +35,36 @@ user_phones = {}
 
 def get_main_menu_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("💰 خرید نقدی (آنی با تخفیف ویژه)", callback_data="mode_cash"))
-    markup.row(telebot.types.InlineKeyboardButton("📅 خرید اقساطی (ویژه پکیج کامل)", callback_data="mode_installment"))
+    markup.row(telebot.types.InlineKeyboardButton("خرید نقدی (آنی با تخفیف ویژه)", callback_data="mode_cash"))
+    markup.row(telebot.types.InlineKeyboardButton("خرید اقساطی (ویژه پکیج کامل)", callback_data="mode_installment"))
     return markup
 
 def get_cash_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("🧬 زیست جامع - 400,000 تومان", callback_data="cash_zist"))
-    markup.row(telebot.types.InlineKeyboardButton("🧪 شیمی جامع - 360,000 تومان", callback_data="cash_shimi"))
-    markup.row(telebot.types.InlineKeyboardButton("💡 فیزیک جامع - 330,000 تومان", callback_data="cash_fizik"))
-    markup.row(telebot.types.InlineKeyboardButton("📐 ریاضی جامع - 360,000 تومان", callback_data="cash_math"))
-    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل ۴ درس - 1,250,000 تومان", callback_data="cash_full"))
-    markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
+    markup.row(telebot.types.InlineKeyboardButton("زیست جامع - 400,000 تومان", callback_data="cash_zist"))
+    markup.row(telebot.types.InlineKeyboardButton("شیمی جامع - 360,000 تومان", callback_data="cash_shimi"))
+    markup.row(telebot.types.InlineKeyboardButton("فیزیک جامع - 330,000 تومان", callback_data="cash_fizik"))
+    markup.row(telebot.types.InlineKeyboardButton("ریاضی جامع - 360,000 تومان", callback_data="cash_math"))
+    markup.row(telebot.types.InlineKeyboardButton("پکیج کامل ۴ درس - 1,250,000 تومان", callback_data="cash_full"))
+    markup.row(telebot.types.InlineKeyboardButton("بازگشت به منوی اصلی", callback_data="back_to_main"))
     return markup
 
 def get_installment_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل اقساطی (قسط اول ۶۰۰ تومانی)", callback_data="inst_full"))
-    markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
+    markup.row(telebot.types.InlineKeyboardButton("پکیج کامل اقساطی (قسط اول ۶۰۰ تومانی)", callback_data="inst_full"))
+    markup.row(telebot.types.InlineKeyboardButton("بازگشت به منوی اصلی", callback_data="back_to_main"))
     return markup
 
 def get_persistent_keyboard():
     keyboard = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True)
-    keyboard.add(telebot.types.KeyboardButton("🚀 منوی اصلی / شروع"))
+    keyboard.add(telebot.types.KeyboardButton("منوی اصلی / شروع"))
     keyboard.add(
-        telebot.types.KeyboardButton("🎁 زیست پارسال (رایگان)"),
-        telebot.types.KeyboardButton("🎁 شیمی پارسال (رایگان)")
+        telebot.types.KeyboardButton("زیست پارسال (رایگان)"),
+        telebot.types.KeyboardButton("شیمی پارسال (رایگان)")
     )
     keyboard.add(
-        telebot.types.KeyboardButton("💬 ارتباط با پشتیبانی"),
-        telebot.types.KeyboardButton("توضیحات بانک تست‌ها 📚")
+        telebot.types.KeyboardButton("ارتباط با پشتیبانی"),
+        telebot.types.KeyboardButton("توضیحات بانک تست‌ها")
     )
     return keyboard
 
@@ -73,13 +73,12 @@ def send_welcome(message):
     try:
         bot.send_message(
             message.chat.id, 
-            "سلام! به ربات بانک تست «بیگ‌بنگ» خوش آمدید. 🚀\n\nلطفاً نوع خرید خود را انتخاب کنید:", 
-            reply_markup=get_main_menu_markup(), 
-            parse_mode="Markdown"
+            "سلام! به ربات بانک تست بیگ‌بنگ خوش آمدید. لطفاً نوع خرید خود را انتخاب کنید:", 
+            reply_markup=get_main_menu_markup()
         )
         bot.send_message(
             message.chat.id,
-            "👇 دسترسی سریع به منوها و آرشیوهای رایگان از طریق دکمه‌های پایین صفحه:",
+            "دسترسی سریع به منوها و آرشیوهای رایگان از طریق دکمه‌های پایین صفحه:",
             reply_markup=get_persistent_keyboard()
         )
     except Exception as e:
@@ -97,9 +96,8 @@ def handle_mode_selection(call):
             bot.edit_message_text(
                 chat_id=call.message.chat.id,
                 message_id=call.message.message_id,
-                text="💰 **بخش خرید نقدی (آنی با تخفیف‌های ویژه تا جمعه ۱۷ مهر)**\n\nمحصول مورد نظر خود را انتخاب کنید:",
-                reply_markup=get_cash_markup(),
-                parse_mode="Markdown"
+                text="بخش خرید نقدی (آنی با تخفیف‌های ویژه تا جمعه ۱۷ مهر)\n\nمحصول مورد نظر خود را انتخاب کنید:",
+                reply_markup=get_cash_markup()
             )
         except Exception as e:
             print(f"Edit cash menu error: {e}")
@@ -107,9 +105,18 @@ def handle_mode_selection(call):
     elif call.data == "mode_installment":
         if call.from_user.id not in user_phones:
             contact_markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-            contact_markup.add(telebot.types.KeyboardButton("📞 اشتراک‌‌گذاری شماره تلفن برای خرید اقساطی", request_contact=True))
+            contact_markup.add(telebot.types.KeyboardButton("اشتراک‌گذاری شماره تلفن برای خرید اقساطی", request_contact=True))
             
             try:
                 bot.send_message(
                     call.message.chat.id,
-                    "📌 برای
+                    "برای ثبت‌نام در طرح فروش اقساطی پکیج کامل، لطفاً روی دکمه زیر بزنید تا شماره تلفن شما جهت پیگیری اقساط ثبت شود:",
+                    reply_markup=contact_markup
+                )
+            except Exception as e:
+                print(f"Request phone error: {e}")
+        else:
+            try:
+                bot.edit_message_text(
+                    chat_id=call.message.chat.id,
+                    message_id=call.
