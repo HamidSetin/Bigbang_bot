@@ -203,3 +203,165 @@ def handle_buy_callback(call):
         )
     except Exception as e:
         print(f"Edit buy text error: {e}")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
+def handle_approve_callback(call):
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+        
+    if call.from_user.id not in ADMIN_IDS:
+        try:
+            bot.answer_callback_query(call.id, "شما دسترسی ادمین ندارید!", show_alert=True)
+        except:
+            pass
+        return
+        
+    user_id = int(call.data.split("_")[1])
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            user_id, 
+            "فیش واریزی شما تایید شد! برای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"User send error: {e}")
+    
+    try:
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            caption=call.message.caption + "\n\nوضعیت: تایید شد توسط ادمین"
+        )
+    except Exception as e:
+        print(f"Caption edit error: {e}")
+
+@bot.message_handler(content_types=['photo', 'document'])
+def handle_receipt(message):
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    username = message.from_user.username
+    
+    chat_info = f"@{username}" if username else "بدون آیدی"
+    product_purchased = user_selected_product.get(user_id, "نامشخص")
+    phone = user_phones.get(user_id, "ثبت نشده")
+    
+    markup = telebot.types.InlineKeyboardMarkup()
+    if username:
+        markup.add(telebot.types.InlineKeyboardButton("چت مستقیم با کاربر", url=f"https://t.me/{username}"))
+    markup.add(telebot.types.InlineKeyboardButton("تایید فیش", callback_data=f"approve_{user_id}"))
+    
+    caption = (
+        f"فیش واریزی جدید!\n\n"
+        f"محصول: {product_purchased}\n"
+        f"نام: {user_name}\n"
+        f"آیدی: {chat_info}\n"
+        f"شماره تماس: {phone}\n"
+        f"آی‌‌دی عددی: {user_id}\n\n"
+        "برای تایید روی دکمه زیر بزنید."
+    )
+    
+    if message.photo:
+        file_id = message.photo[-1].file_id
+        for admin_id in ADMIN_IDS:
+            try:
+                bot.send_photo(admin_id, file_id, caption=caption, reply_markup=markup)
+            except Exception as e:
+                print(f"Admin photo error: {e}")
+    elif message.document:
+        file_id = message.document.file_id
+        for admin_id in ADMIN_IDS:
+            try:
+                bot.send_document(admin_id, file_id, caption=caption, reply_markup=markup)
+            except Exception as e:
+                print(f"Admin doc error: {e}")
+    
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            message.chat.id, 
+            f"فیش شما برای {product_purchased} دریافت شد. پس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"User receipt ack error: {e}")
+
+@bot.message_handler(func=lambda message: message.text in [
+    "منوی اصلی / شروع", 
+    "ارتباط با پشتیبانی", 
+    "توضیحات بانک تست‌ها", 
+    "زیست پارسال (رایگان)", 
+    "شیمی پارسال (رایگان)"
+])
+def handle_persistent_buttons(message):
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("چت با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        if message.text == "منوی اصلی / شروع":
+            bot.send_message(
+                message.chat.id,
+                "سلام دوباره! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
+                reply_markup=get_main_menu_markup()
+            )
+        elif message.text == "زیست پارسال (رایگان)":
+            free_zist_markup = telebot.types.InlineKeyboardMarkup()
+            free_zist_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
+            bot.send_message(
+                message.chat.id,
+                "این هم هدیه شما؛ برای دریافت بانک تست زیست پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
+                reply_markup=free_zist_markup
+            )
+        elif message.text == "شیمی پارسال (رایگان)":
+            free_shimi_markup = telebot.types.InlineKeyboardMarkup()
+            free_shimi_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
+            bot.send_message(
+                message.chat.id,
+                "این هم هدیه شما؛ برای دریافت بانک تست شیمی پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
+                reply_markup=free_shimi_markup
+            )
+        elif message.text == "ارتباط با پشتیبانی":
+            bot.send_message(
+                message.chat.id,
+                "برای ارتباط مستقیم با پشتیبانی و پرسیدن سوالات خود، روی دکمه زیر بزنید:",
+                reply_markup=user_markup
+            )
+        elif message.text == "توضیحات بانک تست‌ها":
+            bot.send_message(
+                message.chat.id,
+                "پرواز به سمت درصد ۱۰۰ با بانک تست‌های بیگ‌بنگ!\n\n"
+                "رفیق، ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم.\n\n"
+                "زیست، شیمی، فیزیک و ریاضی با پوشش کامل مباحث کنکور آماده‌ست تا بترکونی.\n\n"
+                "همین الان نوع خرید خود را انتخاب کن:",
+                reply_markup=user_markup
+            )
+    except Exception as e:
+        print(f"Persistent button error: {e}")
+
+@bot.message_handler(func=lambda message: True)
+def handle_text_fallback(message):
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            message.chat.id,
+            "لطفاً برای ارسال فیش واریزی، فقط عکس یا اسکرین‌شات فیش را ارسال کنید.",
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"Fallback error: {e}")
+
+if __name__ == "__main__":
+    while True:
+        try:
+            bot.infinity_polling(timeout=60, long_polling_timeout=30)
+        except Exception as e:
+            print(f"Polling Error: {e}")
+            time.sleep(3)
