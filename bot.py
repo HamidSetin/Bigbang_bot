@@ -75,30 +75,4 @@ def get_persistent_keyboard():
     return keyboard
 
 @bot.message_handler(commands=['start'])
-def send_welcome(message):
-    try:
-        bot.send_message(
-            message.chat.id, 
-            "سلام! به ربات بانک تست «بیگ‌بنگ» خوش آمدید. 🚀\n\nلطفاً نوع خرید خود را انتخاب کنید:", 
-            reply_markup=get_main_menu_markup(), 
-            parse_mode="Markdown"
-        )
-        bot.send_message(
-            message.chat.id,
-            "👇 دسترسی سریع به منوها و آرشیوهای رایگان از طریق دکمه‌های پایین صفحه:",
-            reply_markup=get_persistent_keyboard()
-        )
-    except Exception as e:
-        print(f"Start command error: {e}")
-
-@bot.callback_query_handler(func=lambda call: call.data in ["mode_cash", "mode_installment", "back_to_main"])
-def handle_mode_selection(call):
-    try:
-        bot.answer_callback_query(call.id)
-    except Exception:
-        pass
-    
-    if call.data == "mode_cash":
-        try:
-            bot.edit_message_text(
-                chat_
+def send_welcome
