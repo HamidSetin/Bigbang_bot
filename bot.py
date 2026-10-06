@@ -119,4 +119,87 @@ def handle_mode_selection(call):
             try:
                 bot.edit_message_text(
                     chat_id=call.message.chat.id,
-                    message_id=call.
+                    message_id=call.message.message_id,
+                    text=(
+                        "بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
+                        "قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
+                        "شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان (دو ماه بعد، هر ماه یک قسط)\n\n"
+                        "محصول خود را انتخاب کنید:"
+                    ),
+                    reply_markup=get_installment_markup()
+                )
+            except Exception as e:
+                print(f"Edit inst menu error: {e}")
+                
+    elif call.data == "back_to_main":
+        try:
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                text="سلام! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
+                reply_markup=get_main_menu_markup()
+            )
+        except Exception as e:
+            print(f"Back main error: {e}")
+
+@bot.message_handler(content_types=['contact'])
+def handle_contact(message):
+    if message.contact:
+        user_phones[message.from_user.id] = message.contact.phone_number
+        try:
+            bot.send_message(
+                message.chat.id,
+                f"شماره تلفن شما ({message.contact.phone_number}) با موفقیت ثبت شد.",
+                reply_markup=get_persistent_keyboard()
+            )
+            bot.send_message(
+                message.chat.id,
+                (
+                    "بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
+                    "قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
+                    "شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان\n\n"
+                    "محصول خود را انتخاب کنید:"
+                ),
+                reply_markup=get_installment_markup()
+            )
+        except Exception as e:
+            print(f"Contact handler error: {e}")
+
+@bot.callback_query_handler(func=lambda call: call.data in cash_prices or call.data in installment_prices)
+def handle_buy_callback(call):
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+    
+    user_id = call.from_user.id
+    
+    if call.data in cash_prices:
+        item_name, price = cash_prices[call.data]
+        user_selected_product[user_id] = f"{item_name} (نقدی)"
+        text = (
+            f"خرید نقدی: {item_name}\n\n"
+            f"مبلغ قابل پرداخت: {price} تومان\n\n"
+            "شماره کارت: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
+            "لطفاً وجه را واریز کرده و عکس فیش را همینجا ارسال کنید."
+        )
+    else:
+        item_name, price_info = installment_prices[call.data]
+        user_selected_product[user_id] = f"{item_name} (اقساطی)"
+        phone = user_phones.get(user_id, "ثبت نشده")
+        text = (
+            f"خرید اقساطی: {item_name}\n\n"
+            f"شرایط پرداخت: {price_info}\n"
+            f"شماره تماس شما: {phone}\n\n"
+            "شماره کارت برای واریز قسط اول: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
+            "لطفاً قسط اول را واریز کرده و عکس فیش آن را همینجا ارسال کنید."
+        )
+        
+    try:
+        bot.edit_message_text(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            text=text
+        )
+    except Exception as e:
+        print(f"Edit buy text error: {e}")
