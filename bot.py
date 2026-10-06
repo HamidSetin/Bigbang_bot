@@ -1,7 +1,7 @@
 import telebot
 import time
 
-# توکن جدید شما
+# توکن ربات شما
 TOKEN = '8604260086:AAGMYdYkNvY-sIz7dZlqjJS0Nw15AoNd__4'
 bot = telebot.TeleBot(TOKEN)
 
@@ -21,24 +21,44 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
-# قیمت‌های زیر فقط تا روز جمعه 17 مهر برقرار خواهد بود
-prices = {
-    "buy_zist": ("بانک تست زیست جامع", "400,000"),
-    "shimi": ("بانک تست شیمی جامع", "360,000"),
-    "fizik": ("بانک تست فیزیک جامع", "330,000"),
-    "math": ("بانک تست ریاضی جامع", "360,000"),
-    "full_4": ("پکیج کامل هر ۴ بانک تست", "1,250,000")
+# قیمت‌های بخش نقدی (تخفیف‌دار تا جمعه ۱۷ مهر ماه)
+cash_prices = {
+    "cash_zist": ("بانک تست زیست جامع (نقدی)", "400,000"),
+    "cash_shimi": ("بانک تست شیمی جامع (نقدی)", "360,000"),
+    "cash_fizik": ("بانک تست فیزیک جامع (نقدی)", "330,000"),
+    "cash_math": ("بانک تست ریاضی جامع (نقدی)", "360,000"),
+    "cash_full": ("پکیج کامل هر ۴ بانک تست (نقدی)", "1,250,000")
 }
 
-user_selected_product = {}
+# قیمت و شرایط بخش اقساطی (فقط پکیج کامل - سه قسط ۶۰۰ تومانی)
+installment_prices = {
+    "inst_full": ("پکیج کامل هر ۴ بانک تست (اقساطی)", "600,000 تومان (قسط اول از کل ۱,۸۰۰,۰۰۰ تومان)")
+}
 
-def get_main_markup():
+# ذخیره موقت اطلاعات کاربران
+user_selected_product = {}
+user_phones = {}
+
+def get_main_menu_markup():
     markup = telebot.types.InlineKeyboardMarkup()
-    markup.row(telebot.types.InlineKeyboardButton("🧬 بانک تست زیست جامع - 400,000 تومان", callback_data="buy_zist"))
-    markup.row(telebot.types.InlineKeyboardButton("🧪 بانک تست شیمی جامع - 360,000 تومان", callback_data="shimi"))
-    markup.row(telebot.types.InlineKeyboardButton("💡 بانک تست فیزیک جامع - 330,000 تومان", callback_data="fizik"))
-    markup.row(telebot.types.InlineKeyboardButton("📐 بانک تست ریاضی جامع - 360,000 تومان", callback_data="math"))
-    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل هر ۴ بانک تست - 1,250,000 تومان", callback_data="full_4"))
+    markup.row(telebot.types.InlineKeyboardButton("💰 خرید نقدی (آنی با تخفیف ویژه)", callback_data="mode_cash"))
+    markup.row(telebot.types.InlineKeyboardButton("📅 خرید اقساطی (ویژه پکیج کامل)", callback_data="mode_installment"))
+    return markup
+
+def get_cash_markup():
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.row(telebot.types.InlineKeyboardButton("🧬 زیست جامع - 400,000 تومان", callback_data="cash_zist"))
+    markup.row(telebot.types.InlineKeyboardButton("🧪 شیمی جامع - 360,000 تومان", callback_data="cash_shimi"))
+    markup.row(telebot.types.InlineKeyboardButton("💡 فیزیک جامع - 330,000 تومان", callback_data="cash_fizik"))
+    markup.row(telebot.types.InlineKeyboardButton("📐 ریاضی جامع - 360,000 تومان", callback_data="cash_math"))
+    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل ۴ درس - 1,250,000 تومان", callback_data="cash_full"))
+    markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
+    return markup
+
+def get_installment_markup():
+    markup = telebot.types.InlineKeyboardMarkup()
+    markup.row(telebot.types.InlineKeyboardButton("📦 پکیج کامل اقساطی (۳ قسط ۶۰۰ تومانی)", callback_data="inst_full"))
+    markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
     return markup
 
 def get_persistent_keyboard():
@@ -59,8 +79,8 @@ def send_welcome(message):
     try:
         bot.send_message(
             message.chat.id, 
-            "سلام! به ربات بیگ بنگ خوش آمدید.\n\nمحصول مورد نظرت رو از منوی زیر انتخاب کن:", 
-            reply_markup=get_main_markup(), 
+            "سلام! به ربات بانک تست «بیگ‌بنگ» خوش آمدید. 🚀\n\nلطفاً نوع خرید خود را انتخاب کنید:", 
+            reply_markup=get_main_menu_markup(), 
             parse_mode="Markdown"
         )
         bot.send_message(
@@ -71,22 +91,119 @@ def send_welcome(message):
     except Exception as e:
         print(f"Start command error: {e}")
 
-@bot.callback_query_handler(func=lambda call: call.data in prices)
+@bot.callback_query_handler(func=lambda call: call.data in ["mode_cash", "mode_installment", "back_to_main"])
+def handle_mode_selection(call):
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+    
+    if call.data == "mode_cash":
+        try:
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                text="💰 **بخش خرید نقدی (آنی با تخفیف‌های ویژه تا جمعه ۱۷ مهر)**\n\nمحصول مورد نظر خود را انتخاب کنید:",
+                reply_markup=get_cash_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            print(f"Edit cash menu error: {e}")
+            
+    elif call.data == "mode_installment":
+        # بررسی ثبت بودن شماره تلفن کاربر
+        if call.from_user.id not in user_phones:
+            contact_markup = telebot.types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+            contact_markup.add(telebot.types.KeyboardButton("📞 اشتراک‌گذاری شماره تلفن برای خرید اقساطی", request_contact=True))
+            
+            try:
+                bot.send_message(
+                    call.message.chat.id,
+                    "📌 برای ثبت‌نام در طرح **فروش اقساطی پکیج کامل**، لطفاً روی دکمه زیر بزنید تا شماره تلفن شما جهت پیگیری اقساط ثبت شود:",
+                    reply_markup=contact_markup
+                )
+            except Exception as e:
+                print(f"Request phone error: {e}")
+        else:
+            try:
+                bot.edit_message_text(
+                    chat_id=call.message.chat.id,
+                    message_id=call.message.message_id,
+                    text="📅 **بخش خرید اقساطی ویژه (فقط پکیج کامل)**\n\n"
+                         "🔹 قیمت کل: ۱,۸۰۰,۰۰۰ تومان\n"
+                         "🔹 شرایط پرداخت: ۳ قسط ۶۰۰,۰۰۰ تومانی (قسط اول همین حالا، دو قسط بعدی هر ماه سر تایم)\n\n"
+                         "محصول خود را انتخاب کنید:",
+                    reply_markup=get_installment_markup(),
+                    parse_mode="Markdown"
+                )
+            except Exception as e:
+                print(f"Edit inst menu error: {e}")
+                
+    elif call.data == "back_to_main":
+        try:
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                text="سلام! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
+                reply_markup=get_main_menu_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            print(f"Back main error: {e}")
+
+@bot.message_handler(content_types=['contact'])
+def handle_contact(message):
+    if message.contact:
+        user_phones[message.from_user.id] = message.contact.phone_number
+        try:
+            bot.send_message(
+                message.chat.id,
+                f"✅ شماره تلفن شما (`{message.contact.phone_number}`) با موفقیت ثبت شد.",
+                reply_markup=get_persistent_keyboard(),
+                parse_mode="Markdown"
+            )
+            bot.send_message(
+                message.chat.id,
+                "📅 **بخش خرید اقساطی ویژه (فقط پکیج کامل)**\n\n"
+                "🔹 قیمت کل: ۱,۸۰۰,۰۰۰ تومان\n"
+                "🔹 شرایط پرداخت: ۳ قسط ۶۰۰,۰۰۰ تومانی (قسط اول همین حالا، دو قسط بعدی هر ماه سر تایم)\n\n"
+                "محصول خود را انتخاب کنید:",
+                reply_markup=get_installment_markup(),
+                parse_mode="Markdown"
+            )
+        except Exception as e:
+            print(f"Contact handler error: {e}")
+
+@bot.callback_query_handler(func=lambda call: call.data in cash_prices or call.data in installment_prices)
 def handle_buy_callback(call):
     try:
         bot.answer_callback_query(call.id)
     except Exception:
         pass
     
-    item_name, price = prices[call.data]
-    user_selected_product[call.from_user.id] = item_name
+    user_id = call.from_user.id
     
-    text = (
-        f"💳 خرید {item_name}\n\n"
-        f"💰 مبلغ قابل پرداخت: {price} تومان\n\n"
-        f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
-        "لطفاً واریز کن و عکس فیش رو همینجا بفرست تا بررسی کنم."
-    )
+    if call.data in cash_prices:
+        item_name, price = cash_prices[call.data]
+        user_selected_product[user_id] = f"{item_name} (نقدی)"
+        text = (
+            f"💳 خرید نقدی: {item_name}\n\n"
+            f"💰 مبلغ قابل پرداخت: {price} تومان\n\n"
+            f"شماره کارت: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
+            "لطفاً وجه را واریز کرده و عکس فیش را همینجا ارسال کنید."
+        )
+    else:
+        item_name, price_info = installment_prices[call.data]
+        user_selected_product[user_id] = f"{item_name} (اقساطی)"
+        phone = user_phones.get(user_id, "ثبت نشده")
+        text = (
+            f"📅 خرید اقساطی: {item_name}\n\n"
+            f"📋 شرایط پرداخت: قسط اول {price_info}\n"
+            f"📱 شماره تماس شما: `{phone}`\n\n"
+            f"شماره کارت برای واریز قسط اول: `5022291535771289` به نام سیدحمیدرضامحسنی راد\n\n"
+            "لطفاً قسط اول را واریز کرده و عکس فیش آن را همینجا ارسال کنید تا ادمین بررسی و تأیید کند."
+        )
+        
     try:
         bot.edit_message_text(
             chat_id=call.message.chat.id, 
@@ -95,7 +212,7 @@ def handle_buy_callback(call):
             parse_mode="Markdown"
         )
     except Exception as e:
-        print(f"Edit text error: {e}")
+        print(f"Edit buy text error: {e}")
 
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def handle_approve_callback(call):
@@ -142,6 +259,7 @@ def handle_receipt(message):
     
     chat_info = f"@{username}" if username else "بدون آیدی"
     product_purchased = user_selected_product.get(user_id, "نامشخص / از منو انتخاب نشده")
+    phone = user_phones.get(user_id, "ثبت نشده / ارسال نشده")
     
     markup = telebot.types.InlineKeyboardMarkup()
     if username:
@@ -150,9 +268,10 @@ def handle_receipt(message):
     
     caption = (
         f"📩 فیش واریزی جدید!\n\n"
-        f"📦 محصول درخواستی: {product_purchased}\n"
+        f"📦 محصول: {product_purchased}\n"
         f"👤 نام: {user_name}\n"
         f"🔗 آیدی: {chat_info}\n"
+        f"📱 شماره تماس: `{phone}`\n"
         f"🆔 آی‌دی عددی: `{user_id}`\n\n"
         "برای تایید روی دکمه زیر بزنید."
     )
@@ -178,7 +297,7 @@ def handle_receipt(message):
     try:
         bot.send_message(
             message.chat.id, 
-            f"✅ فیش شما برای خرید **{product_purchased}** دریافت شد.\nپس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
+            f"✅ فیش شما برای **{product_purchased}** دریافت شد.\nپس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
             reply_markup=user_markup,
             parse_mode="Markdown"
         )
@@ -200,8 +319,8 @@ def handle_persistent_buttons(message):
         if message.text == "🚀 منوی اصلی / شروع":
             bot.send_message(
                 message.chat.id,
-                "سلام دوباره! به منوی اصلی برگشتیم. محصول مورد نظرت رو انتخاب کن:",
-                reply_markup=get_main_markup()
+                "سلام دوباره! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
+                reply_markup=get_main_menu_markup()
             )
         elif message.text == "🎁 زیست پارسال (رایگان)":
             free_zist_markup = telebot.types.InlineKeyboardMarkup()
@@ -242,7 +361,7 @@ def handle_persistent_buttons(message):
                 "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
                 "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب درسی رو شخم زدیم؛ هیچ چیزی از قلم نیفتفته!\n\n"
                 "🧠 توسط رتبه‌برترها و طراحان: سوالات توسط رتبه‌های برتر کنکور و طراحان مطرح آزمون‌ها گلچین شدن تا کیفیت کار صددرصد تضمینی باشه.\n\n"
-                "👇 همین الان از منوی بالا محصول مورد نظرت رو انتخاب کن:",
+                "👇 همین الان نوع خرید خود را انتخاب کنید:",
                 reply_markup=user_markup
             )
     except Exception as e:
@@ -262,7 +381,7 @@ def handle_text_fallback(message):
     except Exception as e:
         print(f"Fallback error: {e}")
 
-# حلقه امن پولینگ برای جلوگیری از کرش‌های ناخواسته
+# حلقه امن پولینگ
 while True:
     try:
         bot.infinity_polling(timeout=60, long_polling_timeout=30)
