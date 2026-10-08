@@ -27,6 +27,14 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
+PERSISTENT_BUTTONS = [
+    "منوی اصلی / شروع", 
+    "ارتباط با پشتیبانی", 
+    "توضیحات بانک تست‌ها", 
+    "زیست پارسال (رایگان)", 
+    "شیمی پارسال (رایگان)"
+]
+
 cash_prices = {
     "cash_zist": ("بانک تست زیست جامع (نقدی)", "400,000"),
     "cash_shimi": ("بانک تست شیمی جامع (نقدی)", "360,000"),
@@ -133,13 +141,7 @@ def send_welcome(message):
     except Exception as e:
         print(f"Start command error: {e}")
 
-@bot.message_handler(func=lambda message: message.text in [
-    "منوی اصلی / شروع", 
-    "ارتباط با پشتیبانی", 
-    "توضیحات بانک تست‌ها", 
-    "زیست پارسال (رایگان)", 
-    "شیمی پارسال (رایگان)"
-])
+@bot.message_handler(func=lambda message: message.text in PERSISTENT_BUTTONS)
 def handle_persistent_buttons(message):
     try:
         if message.text == "منوی اصلی / شروع":
@@ -374,7 +376,7 @@ def handle_receipt(message):
         file_id = message.document.file_id
         for admin_id in ADMIN_IDS:
             try:
-                bot.send_document(admin_id, file_id, caption=caption, reply_markup=markup)
+                bot.send_document(admin_id, file_id, caption=caption, reply_markup=mate)
             except Exception as e:
                 print(f"Admin doc error: {e}")
     
@@ -390,7 +392,8 @@ def handle_receipt(message):
     except Exception as e:
         print(f"User receipt ack error: {e}")
 
-@bot.message_handler(func=lambda message: True)
+# هندلر فال‌بک اصلاح‌شده تا به دکمه‌های منو تداخل نکنه
+@bot.message_handler(func=lambda message: message.text not in PERSISTENT_BUTTONS)
 def handle_text_fallback(message):
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
