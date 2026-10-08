@@ -223,19 +223,4 @@ def handle_buy_callback(call):
     
     user_id = call.from_user.id
     
-    if call.data in cash_prices:
-        item_name, price = cash_prices[call.data]
-        user_selected_product[user_id] = f"{item_name} (نقدی)"
-        text = (
-            f"خرید نقدی: {item_name}\n\n"
-            f"مبلغ قابل پرداخت: {price} تومان\n\n"
-            "شماره کارت: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
-            "لطفاً وجه را واریز کرده و عکس فیش را همینجا ارسال کنید."
-        )
-    else:
-        item_name, price_info = installment_prices[call.data]
-        user_selected_product[user_id] = f"{item_name} (اقساطی)"
-        phone = user_phones.get(user_id, "ثبت نشده")
-        text = (
-            f"خرید اقساطی: {item_name}\n\n"
-            f"شرایط پرداخت: {
+    if
