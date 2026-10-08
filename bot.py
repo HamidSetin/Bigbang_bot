@@ -219,4 +219,20 @@ def handle_approve_callback(call):
             pass
         return
         
-    user_id = int(call.data.split("_")
+    user_id = int(call.data.split("_")[1])
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            user_id, 
+            "✅ فیش واریزی شما تایید شد! برای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"User send error: {e}")
+    
+    try:
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id,
