@@ -20,14 +20,6 @@ SUPPORT_USERNAME = "Sup_Bigbang"
 FREE_ZIST_LINK = "https://t.me/Bigbangzist"  
 FREE_SHIMI_LINK = "https://t.me/Bigbangchem"  
 
-PERSISTENT_BUTTONS = [
-    "منوی اصلی / شروع", 
-    "ارتباط با پشتیبانی", 
-    "توضیحات بانک تست‌ها", 
-    "زیست پارسال (رایگان)", 
-    "شیمی پارسال (رایگان)"
-]
-
 cash_prices = {
     "cash_zist": ("بانک تست زیست جامع (نقدی)", "400,000"),
     "cash_shimi": ("بانک تست شیمی جامع (نقدی)", "360,000"),
@@ -118,7 +110,6 @@ def get_persistent_keyboard():
     )
     return keyboard
 
-# ۱. هندلر دستور استارت
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     try:
@@ -135,50 +126,68 @@ def send_welcome(message):
     except Exception as e:
         print(f"Start command error: {e}")
 
-# ۲. هندلر دکمه‌های ثابت پایین صفحه (Reply Keyboard)
-@bot.message_handler(func=lambda message: message.text in PERSISTENT_BUTTONS)
-def handle_persistent_buttons(message):
+# هندلرهای مجزا و دقیق برای تک‌تک دکمه‌های کیبورد پایین صفحه
+@bot.message_handler(func=lambda message: message.text == "منوی اصلی / شروع")
+def handle_menu_btn(message):
     try:
-        if message.text == "منوی اصلی / شروع":
-            bot.send_message(
-                message.chat.id,
-                "سلام دوباره! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
-                reply_markup=get_main_menu_markup()
-            )
-        elif message.text == "زیست پارسال (رایگان)":
-            free_zist_markup = telebot.types.InlineKeyboardMarkup()
-            free_zist_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
-            bot.send_message(
-                message.chat.id,
-                "این هم هدیه شما؛ برای دریافت بانک تست زیست پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
-                reply_markup=free_zist_markup
-            )
-        elif message.text == "شیمی پارسال (رایگان)":
-            free_shimi_markup = telebot.types.InlineKeyboardMarkup()
-            free_shimi_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
-            bot.send_message(
-                message.chat.id,
-                "این هم هدیه شما؛ برای دریافت بانک تست شیمی پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
-                reply_markup=free_shimi_markup
-            )
-        elif message.text == "ارتباط با پشتیبانی":
-            user_markup = telebot.types.InlineKeyboardMarkup()
-            user_markup.add(telebot.types.InlineKeyboardButton("چت با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
-            bot.send_message(
-                message.chat.id,
-                "برای ارتباط مستقیم با پشتیبانی و پرسیدن سوالات خود، روی دکمه زیر بزنید:",
-                reply_markup=user_markup
-            )
-        elif message.text == "توضیحات بانک تست‌ها":
-            bot.send_message(
-                message.chat.id,
-                DESCRIPTION_TEXT,
-                reply_markup=get_main_menu_markup()
-            )
+        bot.send_message(
+            message.chat.id,
+            "سلام دوباره! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
+            reply_markup=get_main_menu_markup()
+        )
     except Exception as e:
-        print(f"Persistent button error: {e}")
+        print(f"Menu btn error: {e}")
 
-# ۳. هندلر دریافت شماره تماس کاربر برای خرید اقساطی
+@bot.message_handler(func=lambda message: message.text == "زیست پارسال (رایگان)")
+def handle_free_zist_btn(message):
+    try:
+        free_zist_markup = telebot.types.InlineKeyboardMarkup()
+        free_zist_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال زیست پارسال", url=FREE_ZIST_LINK))
+        bot.send_message(
+            message.chat.id,
+            "این هم هدیه شما؛ برای دریافت بانک تست زیست پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
+            reply_markup=free_zist_markup
+        )
+    except Exception as e:
+        print(f"Free zist error: {e}")
+
+@bot.message_handler(func=lambda message: message.text == "شیمی پارسال (رایگان)")
+def handle_free_shimi_btn(message):
+    try:
+        free_shimi_markup = telebot.types.InlineKeyboardMarkup()
+        free_shimi_markup.add(telebot.types.InlineKeyboardButton("ورود به کانال شیمی پارسال", url=FREE_SHIMI_LINK))
+        bot.send_message(
+            message.chat.id,
+            "این هم هدیه شما؛ برای دریافت بانک تست شیمی پارسال به صورت کاملاً رایگان، روی دکمه زیر بزنید:",
+            reply_markup=free_shimi_markup
+        )
+    except Exception as e:
+        print(f"Free shimi error: {e}")
+
+@bot.message_handler(func=lambda message: message.text == "ارتباط با پشتیبانی")
+def handle_support_btn(message):
+    try:
+        user_markup = telebot.types.InlineKeyboardMarkup()
+        user_markup.add(telebot.types.InlineKeyboardButton("چت با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+        bot.send_message(
+            message.chat.id,
+            "برای ارتباط مستقیم با پشتیبانی و پرسیدن سوالات خود، روی دکمه زیر بزنید:",
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"Support btn error: {e}")
+
+@bot.message_handler(func=lambda message: message.text == "توضیحات بانک تست‌ها")
+def handle_desc_btn(message):
+    try:
+        bot.send_message(
+            message.chat.id,
+            DESCRIPTION_TEXT,
+            reply_markup=get_main_menu_markup()
+        )
+    except Exception as e:
+        print(f"Desc btn error: {e}")
+
 @bot.message_handler(content_types=['contact'])
 def handle_contact(message):
     if message.contact:
@@ -202,7 +211,6 @@ def handle_contact(message):
         except Exception as e:
             print(f"Contact handler error: {e}")
 
-# ۴. هندلر کلیدهای شیشه‌ای (انتخاب منوی خرید و بازگشت)
 @bot.callback_query_handler(func=lambda call: call.data in ["mode_cash", "mode_installment", "back_to_main"])
 def handle_mode_selection(call):
     try:
@@ -261,7 +269,6 @@ def handle_mode_selection(call):
         except Exception as e:
             print(f"Back main error: {e}")
 
-# ۵. هندلر کلیدهای شیشه‌ای خرید محصولات (نقدی و اقساطی)
 @bot.callback_query_handler(func=lambda call: call.data in cash_prices or call.data in installment_prices)
 def handle_buy_callback(call):
     try:
@@ -301,7 +308,6 @@ def handle_buy_callback(call):
     except Exception as e:
         print(f"Edit buy text error: {e}")
 
-# ۶. هندلر تایید فیش توسط ادمین
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def handle_approve_callback(call):
     try:
@@ -339,7 +345,6 @@ def handle_approve_callback(call):
     except Exception as e:
         print(f"Caption edit error: {e}")
 
-# ۷. هندلر دریافت عکس یا فایل فیش واریزی از کاربر
 @bot.message_handler(content_types=['photo', 'document'])
 def handle_receipt(message):
     user_id = message.from_user.id
@@ -392,9 +397,11 @@ def handle_receipt(message):
     except Exception as e:
         print(f"User receipt ack error: {e}")
 
-# ۸. هندلر متن متفرقه (فال‌بک برای پیام‌های غیرمرتبط)
-@bot.message_handler(func=lambda message: message.text not in PERSISTENT_BUTTONS)
+# هندلر فال‌بک ایمن که فقط متن‌های متفرقه رو می‌گیره و به دکمه‌ها کاری نداره
+@bot.message_handler(func=lambda message: True)
 def handle_text_fallback(message):
+    text = message.text
+    # اگر کاربر دکمه‌های کیبورد رو فرستاد، اینجا نادیده گرفته میشه چون هندلرهای بالایی دارن هندلشون می‌کنن
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
