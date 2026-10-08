@@ -4,12 +4,13 @@ import requests
 
 TOKEN = '8604260086:AAGMYdYkNvY-sIz7dZlqjJS0Nw15AoNd__4'
 
+# پاک کردن کامل وب‌هوک و آپدیت‌های قبلی برای آزاد شدن توکن
 try:
     requests.get(f"https://api.telegram.org/bot{TOKEN}/deleteWebhook?drop_pending_updates=True", timeout=10)
 except Exception as e:
-    print(f"Direct webhook delete error: {e}")
+    print(f"Webhook delete error: {e}")
 
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot(TOKEN, parse_mode=None)
 
 ADMIN_IDS = [
     6202317657,      
@@ -126,7 +127,6 @@ def send_welcome(message):
     except Exception as e:
         print(f"Start command error: {e}")
 
-# هندلرهای مجزا و دقیق برای تک‌تک دکمه‌های کیبورد پایین صفحه
 @bot.message_handler(func=lambda message: message.text == "منوی اصلی / شروع")
 def handle_menu_btn(message):
     try:
@@ -397,11 +397,8 @@ def handle_receipt(message):
     except Exception as e:
         print(f"User receipt ack error: {e}")
 
-# هندلر فال‌بک ایمن که فقط متن‌های متفرقه رو می‌گیره و به دکمه‌ها کاری نداره
 @bot.message_handler(func=lambda message: True)
 def handle_text_fallback(message):
-    text = message.text
-    # اگر کاربر دکمه‌های کیبورد رو فرستاد، اینجا نادیده گرفته میشه چون هندلرهای بالایی دارن هندلشون می‌کنن
     user_markup = telebot.types.InlineKeyboardMarkup()
     user_markup.add(telebot.types.InlineKeyboardButton("ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
     
@@ -415,14 +412,9 @@ def handle_text_fallback(message):
         print(f"Fallback error: {e}")
 
 if __name__ == "__main__":
-    try:
-        bot.remove_webhook(drop_pending_updates=True)
-    except Exception:
-        pass
-        
     while True:
         try:
-            bot.infinity_polling(timeout=60, long_polling_timeout=30, skip_pending=True)
+            bot.infinity_polling(none_stop=True, interval=0, timeout=20, long_polling_timeout=5)
         except Exception as e:
             print(f"Polling Error: {e}")
-            time.sleep(5)
+            time.sleep(3)
