@@ -1,10 +1,18 @@
 import telebot
 import time
+import requests
 
 TOKEN = '8604260086:AAGMYdYkNvY-sIz7dZlqjJS0Nw15AoNd__4'
+
+# پاک کردن مستقیم وب‌هوک از طریق درخواست HTTP به سرور تلگرام برای جلوگیری از خطای 409
+try:
+    requests.get(f"https://api.telegram.org/bot{TOKEN}/deleteWebhook?drop_pending_updates=True")
+except Exception as e:
+    print(f"Direct webhook delete error: {e}")
+
 bot = telebot.TeleBot(TOKEN)
 
-# پاک کردن کامل وب‌هوک و آپدیت‌های معلق برای جلوگیری از خطای 409 Conflict
+# تلاش مجدد برای حذف وب‌هوک از طریق خود کتابخانه
 try:
     bot.remove_webhook(drop_pending_updates=True)
 except Exception:
@@ -350,7 +358,7 @@ def handle_persistent_buttons(message):
                 "- خیلی سبز\n\n"
                 "⚗️ فیزیک:\n"
                 "- قلم‌چی\n"
-                "- ماز\n"
+                >- ماز\n"
                 "- ماراتون\n"
                 "- خیلی سبز\n"
                 "- مدارس برتر\n\n"
