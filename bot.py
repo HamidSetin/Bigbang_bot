@@ -118,6 +118,7 @@ def get_persistent_keyboard():
     )
     return keyboard
 
+# ۱. هندلر دستور استارت
 @bot.message_handler(commands=['start'])
 def send_welcome(message):
     try:
@@ -134,6 +135,7 @@ def send_welcome(message):
     except Exception as e:
         print(f"Start command error: {e}")
 
+# ۲. هندلر دکمه‌های ثابت پایین صفحه (Reply Keyboard)
 @bot.message_handler(func=lambda message: message.text in PERSISTENT_BUTTONS)
 def handle_persistent_buttons(message):
     try:
@@ -176,6 +178,31 @@ def handle_persistent_buttons(message):
     except Exception as e:
         print(f"Persistent button error: {e}")
 
+# ۳. هندلر دریافت شماره تماس کاربر برای خرید اقساطی
+@bot.message_handler(content_types=['contact'])
+def handle_contact(message):
+    if message.contact:
+        user_phones[message.from_user.id] = message.contact.phone_number
+        try:
+            bot.send_message(
+                message.chat.id,
+                f"شماره تلفن شما ({message.contact.phone_number}) با موفقیت ثبت شد.",
+                reply_markup=get_persistent_keyboard()
+            )
+            bot.send_message(
+                message.chat.id,
+                (
+                    "بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
+                    "قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
+                    "شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان\n\n"
+                    "محصول خود را انتخاب کنید:"
+                ),
+                reply_markup=get_installment_markup()
+            )
+        except Exception as e:
+            print(f"Contact handler error: {e}")
+
+# ۴. هندلر کلیدهای شیشه‌ای (انتخاب منوی خرید و بازگشت)
 @bot.callback_query_handler(func=lambda call: call.data in ["mode_cash", "mode_installment", "back_to_main"])
 def handle_mode_selection(call):
     try:
@@ -234,29 +261,7 @@ def handle_mode_selection(call):
         except Exception as e:
             print(f"Back main error: {e}")
 
-@bot.message_handler(content_types=['contact'])
-def handle_contact(message):
-    if message.contact:
-        user_phones[message.from_user.id] = message.contact.phone_number
-        try:
-            bot.send_message(
-                message.chat.id,
-                f"شماره تلفن شما ({message.contact.phone_number}) با موفقیت ثبت شد.",
-                reply_markup=get_persistent_keyboard()
-            )
-            bot.send_message(
-                message.chat.id,
-                (
-                    "بخش خرید اقساطی ویژه (فقط پکیج کامل تا ۱۷ مهر)\n\n"
-                    "قیمت کل: ۱,۶۰۰,۰۰۰ تومان\n"
-                    "شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۵۰۰,۰۰۰ تومان\n\n"
-                    "محصول خود را انتخاب کنید:"
-                ),
-                reply_markup=get_installment_markup()
-            )
-        except Exception as e:
-            print(f"Contact handler error: {e}")
-
+# ۵. هندلر کلیدهای شیشه‌ای خرید محصولات (نقدی و اقساطی)
 @bot.callback_query_handler(func=lambda call: call.data in cash_prices or call.data in installment_prices)
 def handle_buy_callback(call):
     try:
@@ -296,6 +301,7 @@ def handle_buy_callback(call):
     except Exception as e:
         print(f"Edit buy text error: {e}")
 
+# ۶. هندلر تایید فیش توسط ادمین
 @bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
 def handle_approve_callback(call):
     try:
@@ -333,6 +339,7 @@ def handle_approve_callback(call):
     except Exception as e:
         print(f"Caption edit error: {e}")
 
+# ۷. هندلر دریافت عکس یا فایل فیش واریزی از کاربر
 @bot.message_handler(content_types=['photo', 'document'])
 def handle_receipt(message):
     user_id = message.from_user.id
@@ -385,6 +392,7 @@ def handle_receipt(message):
     except Exception as e:
         print(f"User receipt ack error: {e}")
 
+# ۸. هندلر متن متفرقه (فال‌بک برای پیام‌های غیرمرتبط)
 @bot.message_handler(func=lambda message: message.text not in PERSISTENT_BUTTONS)
 def handle_text_fallback(message):
     user_markup = telebot.types.InlineKeyboardMarkup()
