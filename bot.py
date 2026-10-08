@@ -230,3 +230,15 @@ def handle_mode_selection(call):
                 
     elif call.data == "back_to_main":
         try:
+            bot.edit_message_text(
+                chat_id=call.message.chat.id,
+                message_id=call.message.message_id,
+                text="سلام! به منوی اصلی برگشتیم. لطفاً نوع خرید خود را انتخاب کنید:",
+                reply_markup=get_main_menu_markup()
+            )
+        except Exception as e:
+            print(f"Back main error: {e}")
+
+@bot.message_handler(content_types=['contact'])
+def handle_contact(message):
+    if message.contact:
