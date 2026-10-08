@@ -42,6 +42,46 @@ installment_prices = {
 user_selected_product = {}
 user_phones = {}
 
+DESCRIPTION_TEXT = (
+    "🔥 پرواز به سمت درصد ۱۰۰ با بانک تست‌های خفنِ «بیگ‌‌بنگ»! 🔥\n\n"
+    "رفیق، اگر دنبال اینی که تو کنکور بترکونی و دیگه توی درس‌های اختصاصی لنگ هیچ منبعی نباشی، درست اومدی! ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم تا هیچ نکته‌ای از دستت در نره. 🎯\n\n"
+    "📌 تو این پکیج چی داریم؟\n\n"
+    "🧬 زیست‌شناسی:\n"
+    "- ماز (سالیانه و پرمیوم)\n"
+    "- زیستاز (سالیانه و پیشرفته)\n"
+    "- خیلی سبز (سالیانه و پلاس)\n"
+    "- آرمان\n\n"
+    "🧪 شیمی:\n"
+    "- قلم‌چی\n"
+    "- ماز\n"
+    "- ماراتون\n"
+    "- خیلی سبز\n\n"
+    "⚗️ فیزیک:\n"
+    "- قلم‌چی\n"
+    "- ماز\n"
+    "- ماراتون\n"
+    "- خیلی سبز\n"
+    "- مدارس برتر\n\n"
+    "📐 ریاضی:\n"
+    "- قلم‌چی\n"
+    "- ماراتون\n"
+    "- خیلی سبز\n"
+    "- ماز\n"
+    "- مدارس برتر\n"
+    "- آلفا\n\n"
+    "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
+    "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب درسی رو شخم زدیم؛ هیچ چیزی از قلم نیفتفته!\n\n"
+    "🧠 توسط رتبه‌برترها و طراحان: سوالات توسط رتبه‌های برتر کنکور و طراحان مطرح آزمون‌ها گلچین شدن تا کیفیت کار صددرصد تضمینی باشه.\n\n"
+    "📈 همگام با سختی کنکور: سوالات دقیقاً متناسب با سطح دشواری کنکور طراحی شدن تا توی جلسه آزمون هیچ سورپرایزی برات وجود نداشته باشه.\n\n"
+    "💪 برای چه سطحی مناسبه؟\n"
+    "• پایه متوسط و قوی داری؟ ازت یه غولِ بی‌رقیب می‌سازیم!\n"
+    "• پایه ضعیفی داری؟ کاری می‌کنیم خودت با دیدن پیشرفتت شاخ درآری!\n\n"
+    "🛡 خیالت راحتِ راحت؛ تضمین ۱۰۰ درصدی!\n"
+    "انقدر از کارمون مطمئنیم که تضمین برگشت وجه در صورت نارضایتی گذاشتیم تا با خیالِ تختِ تخت خرید کنی.\n\n"
+    "💡 با این بانک تست، پرونده‌ی کتاب‌های کمک‌درسی قطور و گیج‌کننده برای همیشه بسته میشه و کاملاً بی‌نیاز میشی.\n\n"
+    "👇 همین الان نوع خرید خود رو انتخاب کن:"
+)
+
 def get_main_menu_markup():
     markup = telebot.types.InlineKeyboardMarkup()
     markup.row(telebot.types.InlineKeyboardButton("💳 خرید نقدی (آنی با تخفیف ویژه)", callback_data="mode_cash"))
@@ -200,4 +240,67 @@ def handle_buy_callback(call):
             f"🛒 خرید اقساطی: {item_name}\n\n"
             f"📋 شرایط پرداخت: {price_info}\n"
             f"📱 شماره تماس شما: {phone}\n\n"
-            "
+            "💳 شماره کارت برای واریز قسط اول: 5022291535771289 به نام سیدحمیدرضامحسنی راد\n\n"
+            "📷 لطفاً قسط اول را واریز کرده و عکس فیش آن را همینجا ارسال کنید."
+        )
+        
+    try:
+        bot.edit_message_text(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            text=text
+        )
+    except Exception as e:
+        print(f"Edit buy text error: {e}")
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith("approve_"))
+def handle_approve_callback(call):
+    try:
+        bot.answer_callback_query(call.id)
+    except Exception:
+        pass
+        
+    if call.from_user.id not in ADMIN_IDS:
+        try:
+            bot.answer_callback_query(call.id, "شما دسترسی ادمین ندارید!", show_alert=True)
+        except:
+            pass
+        return
+        
+    user_id = int(call.data.split("_")[1])
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            user_id, 
+            "✅ فیش واریزی شما تایید شد! برای دریافت لینک دسترسی با پشتیبانی در ارتباط باشید:", 
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"User send error: {e}")
+    
+    try:
+        current_caption = call.message.caption or ""
+        bot.edit_message_caption(
+            chat_id=call.message.chat.id, 
+            message_id=call.message.message_id, 
+            caption=current_caption + "\n\n🟢 وضعیت: تایید شد توسط ادمین"
+        )
+    except Exception as e:
+        print(f"Caption edit error: {e}")
+
+@bot.message_handler(content_types=['photo', 'document'])
+def handle_receipt(message):
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    username = message.from_user.username
+    
+    chat_info = f"@{username}" if username else "بدون آیدی"
+    product_purchased = user_selected_product.get(user_id, "نامشخص")
+    phone = user_phones.get(user_id, "ثبت نشده")
+    
+    markup = telebot.types.InlineKeyboardMarkup()
+    if username:
+        markup.add(telebot.types.InlineKeyboardButton("💬 چت مستقیم با کاربر", url=f"https://t.me/{username}"))
+    markup.add(telebot.types.InlineKeyboardButton("✅
