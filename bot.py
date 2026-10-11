@@ -126,30 +126,93 @@ def handle_persistent_buttons(message):
         elif message.text == "📖 توضیحات بانک تست‌ها":
             description_text = (
                 "🔥 پرواز به سمت درصد ۱۰۰ با بانک تست‌های خفنِ «بیگ‌‌بنگ»! 🔥\n\n"
-                "رفیق، اگر دنبال اینی که تو کنکور بترکونی و دیگه توی درس‌های اختصاصی لنگ هیچ منبعی نباشی، درست اومدی! ما اینجا گلِ سرسبدِ سوالات آزمون‌های معتبر کشور رو برات یکجا جمع کردیم تا هیچ نکته‌ای از دستت در نره. 🎯\n\n"
-                "📌 تو این پکیج چی داریم؟\n\n"
-                "🧬 زیست‌شناسی:\n"
-                "- ماز (سالیانه و پرمیوم)\n"
-                "- زیستاز (سالیانه و پیشرفته)\n"
-                "- خیلی سبز (سالیانه و پلاس)\n"
-                "- آرمان\n\n"
-                "🧪 شیمی:\n"
-                "- قلم‌چی\n"
-                "- ماز\n"
-                "- ماراتون\n"
-                "- خیلی سبز\n\n"
-                "⚗️ فیزیک:\n"
-                "- قلم‌چی\n"
-                "- ماز\n"
-                "- ماراتون\n"
-                "- خیلی سبز\n"
-                "- مدارس برتر\n\n"
-                "📐 ریاضی:\n"
-                "- قلم‌چی\n"
-                "- ماراتون\n"
-                "- خیلی سبز\n"
-                "- ماز\n"
-                "- مدارس برتر\n"
-                "- آلفا\n\n"
-                "🚀 چرا بانک تست بیگ‌بنگ بی‌رقیبه؟\n\n"
-                "💯 پوشش صددرصدی: تمام مباحث، فعالیت‌ها و ریزبه‌ریزِ تمرین‌های کتاب
+                "گلچینی از بهترین سوالات آزمون‌های معتبر (ماز، زیستاز، قلم‌چی، خیلی سبز و مدارس برتر) پوشش صددرصدی مباحث کنکور.\n\n"
+                "👇 همین الان نوع خرید خود رو انتخاب کن:"
+            )
+            bot.send_message(
+                message.chat.id,
+                description_text,
+                reply_markup=get_main_menu_markup()
+            )
+    except Exception as e:
+        print(f"Persistent button error: {e}")
+
+@bot.message_handler(content_types=['contact'])
+def handle_contact(message):
+    if message.contact:
+        user_phones[message.from_user.id] = message.contact.phone_number
+        try:
+            bot.send_message(
+                message.chat.id,
+                f"✅ شماره تلفن شما ({message.contact.phone_number}) با موفقیت ثبت شد.",
+                reply_markup=get_persistent_keyboard()
+            )
+            bot.send_message(
+                message.chat.id,
+                (
+                    "🤝 بخش خرید اقساطی ویژه پکیج کامل\n\n"
+                    "💰 قیمت کل: ۱,۸۰۰,۰۰۰ تومان\n"
+                    "📋 شرایط پرداخت: قسط اول ۶۰۰,۰۰۰ تومان (همین الان) + دو قسط بعدی هر کدام ۶۰۰,۰۰۰ تومان\n\n"
+                    "محصول خود را انتخاب کنید:"
+                ),
+                reply_markup=get_installment_markup()
+            )
+        except Exception as e:
+            print(f"Contact handler error: {e}")
+
+@bot.message_handler(content_types=['photo', 'document'])
+def handle_receipt(message):
+    user_id = message.from_user.id
+    user_name = message.from_user.first_name
+    username = message.from_user.username
+    
+    chat_info = f"@{username}" if username else "بدون آیدی"
+    product_purchased = user_selected_product.get(user_id, "نامشخص")
+    phone = user_phones.get(user_id, "ثبت نشده")
+    
+    markup = telebot.types.InlineKeyboardMarkup()
+    if username:
+        markup.add(telebot.types.InlineKeyboardButton("💬 چت مستقیم با کاربر", url=f"https://t.me/{username}"))
+    markup.add(telebot.types.InlineKeyboardButton("✅ تایید فیش", callback_data=f"approve_{user_id}"))
+    
+    caption = (
+        f"🚨 فیش واریزی جدید!\n\n"
+        f"📦 محصول: {product_purchased}\n"
+        f"👤 نام: {user_name}\n"
+        f"🔗 آیدی: {chat_info}\n"
+        f"📱 شماره تماس: {phone}\n"
+        f"🆔 آیدی عددی: {user_id}\n\n"
+        "برای تایید روی دکمه زیر بزنید."
+    )
+    
+    if message.photo:
+        file_id = message.photo[-1].file_id
+        for admin_id in ADMIN_IDS:
+            try:
+                bot.send_photo(admin_id, file_id, caption=caption, reply_markup=markup)
+            except Exception as e:
+                print(f"Admin photo error: {e}")
+    elif message.document:
+        file_id = message.document.file_id
+        for admin_id in ADMIN_IDS:
+            try:
+                bot.send_document(admin_id, file_id, caption=caption, reply_markup=markup)
+            except Exception as e:
+                print(f"Admin doc error: {e}")
+    
+    user_markup = telebot.types.InlineKeyboardMarkup()
+    user_markup.add(telebot.types.InlineKeyboardButton("💬 ارتباط با پشتیبانی", url=f"https://t.me/{SUPPORT_USERNAME}"))
+    
+    try:
+        bot.send_message(
+            message.chat.id, 
+            f"✅ فیش شما برای {product_purchased} دریافت شد. پس از بررسی توسط مدیریت، دسترسی ارسال خواهد شد.",
+            reply_markup=user_markup
+        )
+    except Exception as e:
+        print(f"User receipt ack error: {e}")
+
+@bot.callback_query_handler(func=lambda call: call.data in ["mode_cash", "mode_installment", "back_to_main"])
+def handle_mode_selection(call):
+    try:
+        bot.answer_callback_query(call.
