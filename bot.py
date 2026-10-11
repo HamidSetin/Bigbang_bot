@@ -23,7 +23,7 @@ cash_prices = {
     "cash_shimi": ("بانک تست شیمی جامع (نقدی)", "449,000"),
     "cash_fizik": ("بانک تست فیزیک جامع (نقدی)", "419,000"),
     "cash_math": ("بانک تست ریاضی جامع (نقدی)", "449,000"),
-    "cash_full": ("پکیج کامل هر ۴ بانک تست (نقدی)", "1,600,000")
+    "cash_full": ("پکیج کامل هر ۴ بانک تست (نقدی)", "1,500,000")
 }
 
 installment_prices = {
@@ -45,7 +45,7 @@ def get_cash_markup():
     markup.row(telebot.types.InlineKeyboardButton("🧪 شیمی جامع - 449,000 تومان", callback_data="cash_shimi"))
     markup.row(telebot.types.InlineKeyboardButton("⚗️ فیزیک جامع - 419,000 تومان", callback_data="cash_fizik"))
     markup.row(telebot.types.InlineKeyboardButton("📐 ریاضی جامع - 449,000 تومان", callback_data="cash_math"))
-    markup.row(telebot.types.InlineKeyboardButton("🔥 پکیج کامل ۴ درس - 1,600,000 تومان", callback_data="cash_full"))
+    markup.row(telebot.types.InlineKeyboardButton("🔥 پکیج کامل ۴ درس - 1,500,000 تومان", callback_data="cash_full"))
     markup.row(telebot.types.InlineKeyboardButton("🔙 بازگشت به منوی اصلی", callback_data="back_to_main"))
     return markup
 
